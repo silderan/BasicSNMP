@@ -55,7 +55,7 @@ Then you can do something like that:
 void onDataReceived(const StdByteVector bytes)
 {
   SNMP::Encoder snmp;
-  if( !snmp.decodeAll(bytes) )
+  if( !snmp.decodeAll(bytes, true) )    // second parameter 'true' to keep raw data. Usefull for debugging.
     std::cerr << "Error " << snmp.errorCode() << " in object " << snmp.errorObjectIndex() << std::endl;
   else
   {
@@ -70,6 +70,7 @@ void onDataReceived(const StdByteVector bytes)
       case ASN1TYPE_IA5String:
       case ASN1TYPE_VideoString:
   //		case ASN1TYPE_xxxxString:
+        // Beware. Never call octetString() to use data as a string because it doesn't includes the last /0 byte.
         std::cout << "OctetString " <<  asn1Varbind.toStdString() << std::endl;
         break;
       case ASN1TYPE_INTEGER:
