@@ -36,7 +36,8 @@ Q_OBJECT
 	quint16 mAgentPort;
 	QUdpSocket mAgentSocket;
 	bool mIncludeRawData;		// This is usefull for debuging applications.
-	OID mTableBaseOID;
+
+	QMap<int, OID> mTableRequestMap;
 
 	void onDataReceived();
 
@@ -73,9 +74,9 @@ public:
 		discoverTable(version, OID(oid.toStdString()), comunity, requestID);
 	}
 
-	void cancelDiscoverTable();
-	const OID &tableBaseOID() const	{ return mTableBaseOID;	}
-	bool isDiscoveringTable()const	{ return !mTableBaseOID.isEmpty();	}
+	void cancelDiscoverTable(int requestID);
+	OID tableBaseOID(int requestID) const			{ return mTableRequestMap.value(requestID);		}
+	bool isDiscoveringTable(int requestID) const	{ return mTableRequestMap.contains(requestID);	}
 
 signals:
 	void dataReceived(const SNMP::Encoder &snmp);

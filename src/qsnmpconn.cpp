@@ -76,14 +76,15 @@ void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comuni
 
 void SNMPConn::discoverTable(int version, const OID &oid, const QString &comunity, int requestID)
 {
-	Q_ASSERT(mTableBaseOID.isEmpty());
-	mTableBaseOID = oid;
+	Q_ASSERT( !mTableRequestMap.contains(requestID) );
+	mTableRequestMap[requestID] = oid;
+
 	sendGetNextRequest(version, oid, comunity, requestID);
 }
 
-void SNMPConn::cancelDiscoverTable()
+void SNMPConn::cancelDiscoverTable(int requestID)
 {
-	mTableBaseOID.clear();
+	mTableRequestMap.remove(requestID);
 }
 
 void SNMPConn::onDataReceived()
@@ -94,23 +95,25 @@ void SNMPConn::onDataReceived()
 		mAgentSocket.readDatagram( datagram.chars(), datagram.count() );
 		SNMP::Encoder snmp;
 		snmp.decodeAll(datagram, includeRawData());
-		if( mTableBaseOID.isEmpty() )
+
+		if( !mTableRequestMap.contains(snmp.requestID()) )
 			emit dataReceived(snmp);
 		else
 		{
+			OID tableBaseOID = mTableRequestMap.value(snmp.requestID());
 			if( snmp.varbindList().count() &&
-				snmp.varbindList().first().oid().startsWith(mTableBaseOID) )
+				snmp.varbindList().first().oid().startsWith(tableBaseOID) )
 			{
-				emit tableCellReceived(snmp);
+				emit tableCellReceived( snmp );
 				sendGetNextRequest( snmp.version(),
 									snmp.varbindList().first().oid(),
 									QString::fromStdString(snmp.comunity()),
-									snmp.requestID()+1 );
+									snmp.requestID() );
 			}
 			else
 			{
-				cancelDiscoverTable();
-				emit tableReceived(snmp.requestID());
+				cancelDiscoverTable( snmp.requestID() );
+				emit tableReceived( snmp.requestID() );
 			}
 		}
 	}

@@ -23,7 +23,7 @@
 #ifndef PDUVARBIND_H
 #define PDUVARBIND_H
 
-#include "stdlist.h"
+#include "stddeque.h"
 
 #include "asn1variable.h"
 namespace SNMP {
@@ -61,7 +61,7 @@ public:
 
 
 
-typedef StdList<PDUVarbind> PDUVarbindList;
+typedef StdDeque<PDUVarbind> PDUVarbindList;
 
 
 }	// end namespace SNMP

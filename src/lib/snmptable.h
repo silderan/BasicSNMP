@@ -199,21 +199,23 @@ public:
 	void addCell(const SNMP::PDUVarbind &pduVarbind)
 	{
 		OID oid = pduVarbind.oid();
-		int i = indexOf(oid);
-		if( i == -1 )
+		if( oid.startsWith(baseOID()) )
 		{
-			i = Table::count();
-			// Add a row.
-			Table::append( T(mKeyCount, mColCount) );
-			// set keys.
-			for( int k = 0; k < keyCount(); ++k )
+			int i = indexOf(oid);
+			if( i == -1 )
 			{
-				OIDValue keyOID = oid.at(columnCount()+1+k);
-				Table::operator[](i).setKey(k, keyOID);
+				i = Table::count();
+				// Add a row.
+				Table::append( T(mKeyCount, mColCount) );
+				// set keys.
+				for( int k = 0; k < keyCount(); ++k )
+				{
+					Table::operator[](i).setKey( k, oid.at(columnCount()+1+k) );
+				}
 			}
+			// Set column data.
+			Table::operator[](i).setColumn( oid.at(columnCount()).toULongLong()-1, pduVarbind );
 		}
-		OIDValue columnOID = oid.at( columnCount() );
-		Table::operator[](i).setColumn( columnOID.toULongLong()-1, pduVarbind );
 	}
 	void addCells(const SNMP::PDUVarbindList &pduVarbindList)
 	{
