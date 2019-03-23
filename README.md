@@ -1,6 +1,6 @@
 # BasicSNMP
 
-This is a library for basic SNMPv1 and SNMPv2 protocol for a manager (not the agent).
+This is a library for basic SNMPv1 and SNMPv2c protocol for a manager (not the agent).
 
 Sadly, this won't include any MIB parsing.
 Anyway, the advantatjes using a MIB are not many, because this library is not for a universal NMB program able to control many unrelated agents. This is for a program to control a snmp-agent.
@@ -49,7 +49,7 @@ void main()
 }
 ```
 
-Next step is to send it throw any UDP socket to the agent and wait for the reply.
+Next step is to send it throu any UDP socket to the agent and wait for the reply.
 Then you can do something like that:
 ```
 void onDataReceived(const StdByteVector bytes)
