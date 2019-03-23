@@ -3,7 +3,7 @@
 This is a library for basic SNMPv1 and SNMPv2c protocol for a manager (not the agent).
 
 Sadly, this won't include any MIB parsing.
-Anyway, the advantatjes using a MIB are not many, because this library is not for a universal NMB program able to control many unrelated agents. This is for a program to control a snmp-agent.
+Anyway, the advantages using a MIB are not many in a library like this one, because this library is not for a universal NMS program able to control many unrelated agents. This is for a program to control a specific snmp-agent.
 
 The main goal for this project is to include this library in any simple program that needs to talk to specific agents, but you must know the OIDs and the type of the values to send/get.
 
