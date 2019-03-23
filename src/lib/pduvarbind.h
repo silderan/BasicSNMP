@@ -23,11 +23,6 @@
 #ifndef PDUVARBIND_H
 #define PDUVARBIND_H
 
-#ifdef QT_CORE_LIB
-#include <QString>
-#include <QByteArray>
-#endif
-
 #include "stdlist.h"
 
 #include "asn1variable.h"
@@ -36,7 +31,7 @@ namespace SNMP {
 class PDUVarbind : public ASN1::Variable
 {
 	OID mOID;
-	StdCharVector mRawValue;
+	StdByteVector mRawValue;
 
 public:
 	PDUVarbind( const OID &oid = "", const ASN1::Variable &asn1Var = ASN1::Variable() )
@@ -63,8 +58,8 @@ public:
 		mRawValue = other.mRawValue;
 		return *this;
 	}
-	const StdCharVector &rawValue()const	{ return mRawValue;	}
-	StdCharVector &rawValue()				{ return mRawValue;	}
+	const StdByteVector &rawValue()const	{ return mRawValue;	}
+	StdByteVector &rawValue()				{ return mRawValue;	}
 
 	const OID &oid()const	{ return mOID;	}
 	OID &oid()				{ return mOID;	}

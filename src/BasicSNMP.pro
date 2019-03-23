@@ -28,7 +28,6 @@ SOURCES += \
 	main.cpp \
 	mainwindow.cpp \
 	QIniFile.cpp \
-    lib/asn1types.cpp \
     lib/snmptable.cpp \
     lib/asn1variable.cpp \
     lib/asn1encoder.cpp \
@@ -54,7 +53,10 @@ HEADERS += \
 	utils.h \
     snmptests.h \
 	qsnmpconn.h \
-    qconstantsstrings.h
+    qconstantsstrings.h \
+    lib/types.h \
+    lib/stdstring.h \
+    lib/basic_types.h
 
 FORMS += \
         mainwindow.ui

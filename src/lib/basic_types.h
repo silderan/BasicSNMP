@@ -9,21 +9,28 @@
   published by the Free Software Foundation, either version 3 of
   the License, or (at your option) any later version.
 
-  BasicSNMP is distributed in the hope that it will be useful,
+  QMikPPPManager is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  and GNU Lesser General Public License. along with BasicSNMP.
+  and GNU Lesser General Public License. along with QMikPPPManager.
   If not, see <http://www.gnu.org/licenses/>.
 
 **************************************************************************/
+#ifndef BASIC_SNMP_BASIC_TYPES_H
+#define BASIC_SNMP_BASIC_TYPES_H
 
-#include "asn1types.h"
-#include "utils.h"
+typedef char Int8;
+typedef short Int16;
+typedef int	Int32;
+typedef long long Int64;
 
-namespace ASN1
-{
+typedef unsigned char Byte;
+typedef Byte UInt8;
+typedef unsigned short UInt16;
+typedef unsigned int UInt32;
+typedef unsigned long long UInt64;
 
-}
+#endif // BASIC_SNMP_BASIC_TYPES_H

@@ -23,10 +23,11 @@
 #ifndef ASN1TYPES_H
 #define ASN1TYPES_H
 
+#include "basic_types.h"
 namespace ASN1
 {
 
-typedef char DataType;
+typedef Byte DataType;
 
 } // namespace ASN1
 
@@ -50,7 +51,7 @@ typedef char DataType;
 #define ASN1TYPE_ENUMERATED				(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_PRIMITIVE | static_cast<ASN1::DataType>(0x0A))	// 0x0A
 
 #define ASN1TYPE_SEQUENCE				(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_PRIMITIVE | static_cast<ASN1::DataType>(0x10))	// 0x10
-#define ASN1TYPE_Sequence				(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_CONSTRUCTED | static_cast<ASN1::DataType>(0x10))	// 0x30
+#define ASN1TYPE_Sequence				(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_CONSTRUCTED | static_cast<ASN1::DataType>(0x10))// 0x30
 
 #define ASN1TYPE_NumericString			(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_PRIMITIVE | static_cast<ASN1::DataType>(0x12))	// 0x12
 #define ASN1TYPE_PrintableString		(ASN1TYPECLASS_UNIVERSAL | ASN1TYPEBASE_PRIMITIVE | static_cast<ASN1::DataType>(0x13))	// 0x13

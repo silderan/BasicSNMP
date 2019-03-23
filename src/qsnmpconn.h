@@ -45,14 +45,34 @@ public:
 
 	void setAgentHost(const QString &agentAddress, quint16 agentPort);
 	void setIncludeRawData(bool includeRawData = true)	{ mIncludeRawData = includeRawData;	}
-	bool includeRasData() const							{ return mIncludeRawData;	}
+	bool includeRawData() const							{ return mIncludeRawData;	}
 
 	void sendRequest(const SNMP::Encoder &snmpDeco);
+
 	void sendGetRequest(int version, const OID &oid, const QString &comunity, int requestID);
+	void sendGetRequest(int version, const QString &oid, const QString &comunity, int requestID)
+	{
+		sendGetRequest(version, OID(oid.toStdString()), comunity, requestID);
+	}
+
 	void sendGetNextRequest(int version, const OID &oid, const QString &comunity, int requestID);
+	void sendGetNextRequest(int version, const QString &oid, const QString &comunity, int requestID)
+	{
+		sendGetNextRequest(version, OID(oid.toStdString()), comunity, requestID);
+	}
+
 	void sendSetRequest(int version, const OID &oid, const QString &comunity, const ASN1::Variable &asn1Var, int requestID);
+	void sendSetRequest(int version, const QString &oid, const QString &comunity, const ASN1::Variable &asn1Var, int requestID)
+	{
+		sendSetRequest(version, OID(oid.toStdString()), comunity, asn1Var, requestID);
+	}
 
 	void discoverTable(int version, const OID &oid, const QString &comunity, int requestID);
+	void discoverTable(int version, const QString &oid, const QString &comunity, int requestID)
+	{
+		discoverTable(version, OID(oid.toStdString()), comunity, requestID);
+	}
+
 	void cancelDiscoverTable();
 	const OID &tableBaseOID() const	{ return mTableBaseOID;	}
 	bool isDiscoveringTable()const	{ return !mTableBaseOID.isEmpty();	}

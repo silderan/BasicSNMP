@@ -24,9 +24,9 @@
 
 namespace SNMP {
 
-const std::map<EntryStatus, std::string> &entryStatusInfoMap()
+const std::map<EntryStatus, StdString> &entryStatusInfoMap()
 {
-	static std::map<EntryStatus, std::string> infoMap =
+	static std::map<EntryStatus, StdString> infoMap =
 	{
 		{EntryStatus::valid,			"EntryStatus: valid"},
 		{EntryStatus::createRequest,	"EntryStatus: createRequest"},
@@ -36,14 +36,14 @@ const std::map<EntryStatus, std::string> &entryStatusInfoMap()
 	return infoMap;
 }
 
-std::string entryStatusName(EntryStatus es)
+StdString entryStatusName(EntryStatus es)
 {
-	return Utils::value( entryStatusInfoMap(), es, std::string("EntryStatus: error-code") );
+	return Utils::value( entryStatusInfoMap(), es, StdString("EntryStatus: error-code") );
 }
 
-const std::map<StatusRow, std::string> &statusRowInfoMap()
+const std::map<StatusRow, StdString> &statusRowInfoMap()
 {
-	static std::map<StatusRow, std::string> infoMap =
+	static std::map<StatusRow, StdString> infoMap =
 	{
 		{StatusRow::active,			"EntryStatus: valid"},
 		{StatusRow::notInService,	"EntryStatus: notInService"},
@@ -54,9 +54,9 @@ const std::map<StatusRow, std::string> &statusRowInfoMap()
 	};
 	return infoMap;
 }
-std::string statusRowName(StatusRow sr)
+StdString statusRowName(StatusRow sr)
 {
-	return Utils::value( statusRowInfoMap(), sr, std::string("EntryStatus: error-code") );
+	return Utils::value( statusRowInfoMap(), sr, StdString("EntryStatus: error-code") );
 }
 
 } // namespace SNMP

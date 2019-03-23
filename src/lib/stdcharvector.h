@@ -23,114 +23,100 @@
 #ifndef STDCHARVECTOR_H
 #define STDCHARVECTOR_H
 
-#include <vector>
 #include <string>
+#include <cstring>
 
-#ifdef QT_CORE_LIB
-#include <QString>
-#include <QByteArray>
-#endif
-
+#include "basic_types.h"
+#include "stdstring.h"
+#include "stdvector.h"
 #include "utils.h"
 
-class StdCharVector : public std::vector<char>
+class StdByteVector : public StdVector<Byte>
 {
 
 public:
-	StdCharVector() = default;
+	StdByteVector() = default;
 
-	StdCharVector(const std::vector<char> &v)
-		: std::vector<char> (v)
+	StdByteVector(const StdVector<Byte> &v)
+		: StdVector<Byte> (v)
 	{	}
 
-	StdCharVector(const char *a, long long len)
-		: StdCharVector(len)
+	StdByteVector(const char *a, Int64 len)
+		: StdByteVector(len)
 	{
 		while( len-- )
-			at(len) = a[len];
+			at(len) = static_cast<Byte>(a[len]);
 	}
-	StdCharVector(const std::string &s)
-		: StdCharVector(s.data(), static_cast<long long>(s.size()) )
+	StdByteVector(const StdString &s)
+		: StdByteVector(s.data(), static_cast<Int64>(s.size()) )
 	{	}
-	StdCharVector(long long t)
-		: std::vector<char>( static_cast<unsigned long long>(t) )
+	StdByteVector(Int64 t)
+		: StdVector<Byte>( static_cast<UInt64>(t) )
 	{	}
-	char &at(long long i)
+	Byte &at(Int64 i)
 	{
-		return std::vector<char>::at( static_cast<std::vector<char>::size_type >(i)) ;
+		return StdVector<Byte>::at(i) ;
 	}
-	char at(long long i) const
+	Byte at(Int64 i) const
 	{
-		return std::vector<char>::at( static_cast<std::vector<char>::size_type >(i)) ;
+		return StdVector<Byte>::at(i) ;
 	}
-	char operator[](long long i) const	{ return at(i);	}
-	char &operator[](long long i)		{ return at(i);	}
+	Byte operator[](Int64 i) const	{ return at(i);	}
+	Byte &operator[](Int64 i)		{ return at(i);	}
 	bool isEmpty() const	{ return count() == 0;	}
 
 	bool contains(char c) const
 	{
 		return Utils::contains(*this, c);
 	}
-	long long count() const		{ return static_cast<long long>(size());	}
-	void resize(long long s)	{ std::vector<char>::resize(static_cast<std::vector<char>::size_type>(s));	}
-	void insert(long long pos, char c)
+	Int64 count() const		{ return static_cast<Int64>(size());	}
+	void resize(Int64 s)	{ StdVector<Byte>::resize(s);			}
+	void insert(Int64 pos, Byte c)
 	{
-		std::vector<char>::insert( std::begin(*this) + static_cast<StdCharVector::difference_type>(pos), c );
+		StdVector<Byte>::insert( std::begin(*this) + static_cast<StdByteVector::difference_type>(pos), c );
 	}
-	void insert(long long pos, const StdCharVector &v)
+	void insert(Int64 pos, const StdByteVector &v)
 	{
-		std::vector<char>::insert( std::begin(*this)+pos, std::begin(v), std::end(v) );
+		StdVector<Byte>::insert( std::begin(*this)+pos, std::begin(v), std::end(v) );
 	}
-	void insert(long long pos, const char *c)
+	void insert(Int64 pos, const char *c)
 	{
-		insert( pos, StdCharVector(c, static_cast<long long>(strlen(c))) );
+		insert( pos, StdByteVector(c, static_cast<Int64>(strlen(c))) );
 	}
-	StdCharVector mid( long long pos, long long length ) const
+	StdByteVector mid( Int64 pos, Int64 length ) const
 	{
 		if( (pos + length) > count() )
-			length = static_cast<unsigned int>(count() - pos);
-		StdCharVector rtn(length);
+			length = static_cast<UInt32>(count() - pos);
+		StdByteVector rtn(length);
 		while( length-- > 0 )
 			rtn[length] = at(pos+length);
 
 		return rtn;
 	}
-	std::string printableBytes(const std::string &sep = "")const
-	{
-		return Utils::printableBytes(*this, sep);
-	}
-	StdCharVector &append(char c)
+	StdByteVector &append(Byte c)
 	{
 		push_back(c);
 		return *this;
 	}
 
-	StdCharVector &append(const StdCharVector &b)
+	StdByteVector &append(const StdByteVector &b)
 	{
-		static_cast<std::vector<char> &>(*this).insert( std::end(*this), std::begin(b), std::end(b) );
+		static_cast<StdVector<Byte> &>(*this).insert( std::end(*this), std::begin(b), std::end(b) );
 		return *this;
 	}
-	StdCharVector &append(const char *b)
-	{
-		return append( StdCharVector(b, static_cast<long long>(strlen(b))) );
-	}
-	StdCharVector &operator +=(const StdCharVector &b)
-	{
-		return append(b);
-	}
-#ifdef QT_CORE_LIB
-	StdCharVector(const QByteArray &ba)
-		: StdCharVector(ba.constData(), ba.count())
-	{	}
-	StdCharVector(const QString &s)
-		: StdCharVector(s.toLatin1())
-	{	}
 
-	QString qPrintableBytes(const QString &sep = "")
-	{
-		return QString::fromStdString(Utils::printableBytes(*this, sep.toStdString()));
-	}
-#endif
+	StdByteVector &append(const char *b)	{ return append( StdByteVector(b, static_cast<Int64>(strlen(b))) ); }
+	StdByteVector &append(const Byte *b)	{ return append( StdByteVector( reinterpret_cast<const char*>(b)) ); }
+
+	StdByteVector &operator +=(const StdByteVector &b) { return append(b); }
+
+	const Byte *bytes() const	{ return StdVector<Byte>::data(); }
+	Byte *bytes()				{ return StdVector<Byte>::data(); }
+
+	const char *chars() const	{ return reinterpret_cast<const char*>(bytes());	}
+	char *chars()				{ return reinterpret_cast<char*>(bytes());			}
+
+	StdString toStdString() const { return StdString( chars(), size() ); }
 };
 
 #endif // STDCHARVECTOR_H

@@ -83,8 +83,8 @@ enum StatusRow
 	destroy
 };
 
-const std::map<EntryStatus, std::string> &entryStatusInfoMap();
-std::string entryStatusName(EntryStatus es);
+const std::map<EntryStatus, StdString> &entryStatusInfoMap();
+StdString entryStatusName(EntryStatus es);
 #ifdef QT_CORE_LIB
 inline QString qEntryStatusName(EntryStatus es)
 {
@@ -92,8 +92,8 @@ inline QString qEntryStatusName(EntryStatus es)
 }
 #endif
 
-const std::map<StatusRow, std::string> &statusRowInfoMap();
-std::string statusRowName(StatusRow sr);
+const std::map<StatusRow, StdString> &statusRowInfoMap();
+StdString statusRowName(StatusRow sr);
 #ifdef QT_CORE_LIB
 inline QString qStatusRowName(StatusRow sr)
 {
@@ -104,7 +104,7 @@ inline QString qStatusRowName(StatusRow sr)
 struct TableInfo
 {
 	OID keyIndexes;
-	unsigned long long column;
+	UInt64 column;
 	SNMP::PDUVarbind varbind;
 
 	TableInfo(const OID &baseOID, const Encoder &snmp)
@@ -118,7 +118,7 @@ struct TableInfo
 			varbind = snmp.varbindList().first();
 			column = varbind.oid()[baseOID.count()].toULongLong();
 
-			for( long long i = baseOID.count()+1; i < varbind.oid().count(); ++i )
+			for( Int64 i = baseOID.count()+1; i < varbind.oid().count(); ++i )
 				keyIndexes.push_back( varbind.oid()[i] );
 		}
 	}

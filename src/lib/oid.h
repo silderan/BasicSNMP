@@ -26,16 +26,12 @@
 #include <utils.h>
 #include <string>
 
-#include "stdvector.h"
-
-#ifdef QT_CORE_LIB
-#include <QString>
-#endif
+#include "types.h"
 
 class OIDValue
 {
-	std::string mStringValue;
-	unsigned long long mValue;
+	StdString mStringValue;
+	UInt64 mValue;
 
 public:
 	OIDValue()
@@ -44,67 +40,55 @@ public:
 		: mStringValue( v )
 		, mValue( std::stoull(v) )
 	{	}
-	OIDValue(const std::string &s)
+	OIDValue(const StdString &s)
 		: OIDValue( s.data() )
 	{	}
 	template <typename T>
 	OIDValue(T v)
-		: mValue( static_cast<unsigned long long>(v) )
+		: mValue( static_cast<UInt64>(v) )
 	{	}
 
-	std::string toStdString() const
+	StdString toStdString() const
 	{
-		if( mStringValue.length() != 0 )
-			return mStringValue;
-		return std::to_string(mValue);
+		if( mStringValue.length() == 0 )
+			const_cast<OIDValue&>(*this).mStringValue = std::to_string(mValue);
+		return mStringValue;
 	}
-	unsigned long long toULongLong() const
+	UInt64 toULongLong() const
 	{
 		return mValue;
 	}
 	template <typename T>
-	bool operator ==(T v) const	{ return mValue == static_cast<unsigned long long>(v);	}
+	bool operator ==(T v) const	{ return mValue == static_cast<UInt64>(v);	}
 	template <typename T>
-	bool operator !=(T v) const	{ return mValue != static_cast<unsigned long long>(v);	}
-	bool operator ==(const std::string &v) const	{ return std::stoull(v) == mValue;	}
-	bool operator !=(const std::string &v) const	{ return std::stoull(v) != mValue;	}
+	bool operator !=(T v) const	{ return mValue != static_cast<UInt64>(v);	}
+	bool operator ==(const StdString &v) const	{ return std::stoull(v) == mValue;	}
+	bool operator !=(const StdString &v) const	{ return std::stoull(v) != mValue;	}
 	bool operator ==(const OIDValue &v) const		{ return v.mValue == mValue;		}
 	bool operator !=(const OIDValue &v) const		{ return v.mValue != mValue;		}
-
-#ifdef QT_CORE_LIB
-	OIDValue( const QString &v )
-		: OIDValue( v.toStdString() )
-	{	}
-	bool operator ==(const QString &v) const	{ return v.toULongLong() == mValue;		}
-	bool operator !=(const QString &v) const	{ return v.toULongLong() != mValue;		}
-	QString toQString() const
-	{
-		return QString::fromStdString(toStdString());
-	}
-#endif
 };
 
 class OID : public StdVector<OIDValue>
 {
 public:
 	OID() = default;
-	OID( long long initialSize )
+	OID( Int64 initialSize )
 		: StdVector(initialSize)
 	{	}
 	OID( int initialSize )
 		: StdVector(initialSize)
 	{	}
-	OID( const StdVector<std::string> &oid )
+	OID( const StdVector<StdString> &oid )
 		: StdVector<OIDValue>(oid.count())
 	{
-		long long i = 0;
-		for( std::string bit : oid )
+		Int64 i = 0;
+		for( StdString bit : oid )
 			at(i++) = bit;
 	}
 	OID( const char *charStr )
-		: OID( Utils::split( std::string(charStr), '.') )
+		: OID( Utils::split( StdString(charStr), '.') )
 	{	}
-	OID( const std::string &s )
+	OID( const StdString &s )
 		: OID( Utils::split(s, '.') )
 	{	}
 	OID( const OIDValue &a )
@@ -121,23 +105,13 @@ public:
 				return false;
 		return true;
 	}
-	std::string toStdString() const
+	StdString toStdString() const
 	{
-		std::string rtn;
+		StdString rtn;
 		for( OIDValue val : *this )
 			rtn += "." +  val.toStdString();
 		return rtn;
 	}
-#ifdef QT_CORE_LIB
-	OID( const QString &str )
-		: OID( str.toStdString() )
-	{
-	}
-	QString toQString() const
-	{
-		return QString::fromStdString( toStdString() );
-	}
-#endif
 };
 typedef StdVector<OID> OIDList;
 

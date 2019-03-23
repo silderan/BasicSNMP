@@ -23,11 +23,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <assert.h>
 #include <string>
 #include <algorithm>
 #include <map>
 
 #include "lib/stdvector.h"
+#include "lib/stdstring.h"
 
 namespace Utils
 {
@@ -35,47 +37,47 @@ namespace Utils
 	{
 		union
 		{
-			unsigned int ipNumber;
+			UInt32 ipNumber;
 			struct
 			{
-				unsigned char octetD;
-				unsigned char octetC;
-				unsigned char octetB;
-				unsigned char octetA;
+				Byte octetD;
+				Byte octetC;
+				Byte octetB;
+				Byte octetA;
 			}octets;
 		}ipv4;
 	public:
-		IPv4Address(unsigned int ipv4Number = 0)
+		IPv4Address(UInt32 ipv4Number = 0)
 		{
 			ipv4.ipNumber = ipv4Number;
 		}
-		IPv4Address(unsigned char A, unsigned char B, unsigned char C, unsigned char D)
+		IPv4Address(Byte A, Byte B, Byte C, Byte D)
 		{
 			ipv4.octets.octetA = A;
 			ipv4.octets.octetB = B;
 			ipv4.octets.octetC = C;
 			ipv4.octets.octetD = D;
 		}
-		unsigned int number() const				{ return ipv4.ipNumber;			}
-		void setNumber(unsigned int ipv4Number)	{ ipv4.ipNumber = ipv4Number;	}
+		UInt32 number() const				{ return ipv4.ipNumber;			}
+		void setNumber(UInt32 ipv4Number)	{ ipv4.ipNumber = ipv4Number;	}
 
-		unsigned char octetA() const    { return ipv4.octets.octetA;    }
-		void setOctetA(unsigned char a)	{ ipv4.octets.octetA = a;		}
+		Byte octetA() const		{ return ipv4.octets.octetA;    }
+		void setOctetA(Byte a)	{ ipv4.octets.octetA = a;		}
 
-		unsigned char octetB() const    { return ipv4.octets.octetB;    }
-		void setOctetB(unsigned char b)	{ ipv4.octets.octetB = b;		}
+		Byte octetB() const		{ return ipv4.octets.octetB;    }
+		void setOctetB(Byte b)	{ ipv4.octets.octetB = b;		}
 
-		unsigned char octetC() const    { return ipv4.octets.octetC;    }
-		void setOctetC(unsigned char c)	{ ipv4.octets.octetC = c;		}
+		Byte octetC() const		{ return ipv4.octets.octetC;    }
+		void setOctetC(Byte c)	{ ipv4.octets.octetC = c;		}
 
-		unsigned char octetD() const    { return ipv4.octets.octetD;    }
-		void setOctetD(unsigned char d)	{ ipv4.octets.octetD = d;		}
+		Byte octetD() const		{ return ipv4.octets.octetD;    }
+		void setOctetD(Byte d)	{ ipv4.octets.octetD = d;		}
 	};
 
 	template <typename T, typename C>
 	StdVector<T> split(const T& s, C separator, bool skipEmptyValues = true)
 	{
-		std::vector<T> output;
+		StdVector<T> output;
 
 		typename T::size_type prev_pos = 0, pos = 0;
 
@@ -101,14 +103,14 @@ namespace Utils
 	}
 
 	template <typename T>
-	std::string printableByte(T num, unsigned int size = 0)
+	StdString printableByte(T num, UInt32 size = 0)
 	{
 		if( size <= 0 )
 			size = sizeof(T)<<1;
 
-		std::string rtn( size--, '0' );
+		StdString rtn( size--, '0' );
 
-		unsigned int i = 0;
+		UInt32 i = 0;
 		do
 		{
 			rtn[i++] = _hexChar( (num >> (4 * size)) & 0xF );
@@ -119,17 +121,17 @@ namespace Utils
 	}
 
 	template <typename T>
-	std::string printableBytes(const T &vector, const std::string &sep = "")
+	StdString printableBytes(const T &vector, const StdString &sep = "")
 	{
 		typename T::size_type vectorSize = vector.size();
 		if( vectorSize == 0 )
-			return std::string();
+			return StdString();
 		typename T::size_type separatorSize = sep.size();
-		std::string::size_type totalSize = (vectorSize << 1) + (separatorSize * (vectorSize - 1));
-		std::string rtn( totalSize, '0' );
+		StdString::size_type totalSize = (vectorSize << 1) + (separatorSize * (vectorSize - 1));
+		StdString rtn( totalSize, '0' );
 
-		unsigned int vIndex = 0;
-		unsigned int outIndex = 0;
+		UInt32 vIndex = 0;
+		UInt32 outIndex = 0;
 		do
 		{
 			rtn[outIndex++] = _hexChar( (vector[vIndex] >> 4) & 0xF );
@@ -144,17 +146,17 @@ namespace Utils
 
 		return rtn;
 	}
-	inline std::string ipv4AddressToStdString(const IPv4Address &ipv4, const std::string &sep = ".")
+	inline StdString ipv4AddressToStdString(const IPv4Address &ipv4, const StdString &sep = ".")
 	{
 		return std::to_string( ipv4.octetA() ) + sep +
 			   std::to_string( ipv4.octetB() ) + sep +
 			   std::to_string( ipv4.octetC() ) + sep +
 			   std::to_string( ipv4.octetD() );
 	}
-	inline IPv4Address stdStringToIPV4Address(const std::string &stringIP)
+	inline IPv4Address stdStringToIPV4Address(const StdString &stringIP)
 	{
-		unsigned int ip = 0;
-		for( const std::string &num : split(stringIP, '.') )
+		UInt32 ip = 0;
+		for( const StdString &num : split(stringIP, '.') )
 			ip = (ip << 8) + std::stoul(num);
 		return Utils::IPv4Address(ip);
 	}

@@ -41,9 +41,9 @@ class Variable
 		{
 			bool boolean;
 			int Integer32;
-			unsigned int UInteger32;
-			long long Integer64;
-			unsigned long long UInteger64;
+			UInt32 UInteger32;
+			Int64 Integer64;
+			UInt64 UInteger64;
 			float Float;
 			double Double;
 			Number()
@@ -54,7 +54,7 @@ class Variable
 
 		bool isNegative;
 		OID oid;
-		StdCharVector octetString;
+		StdByteVector octetString;
 		Value()
 			: isNegative(false)
 		{
@@ -86,45 +86,45 @@ public:
 	bool toBoolean()const				{ return mDataValue.number.boolean;	}
 	void setBoolean(bool b)				{ mDataType = ASN1TYPE_BOOLEAN;	mDataValue.number.boolean = b;	}
 
-	long long toInteger() const			{ return mDataValue.number.Integer64;	}
+	Int64 toInteger() const			{ return mDataValue.number.Integer64;	}
 	int toInteger32() const				{ return static_cast<int>(mDataValue.number.UInteger64);	}
-	void setInteger(long long i)		{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.Integer64 = i;	}
+	void setInteger(Int64 i)		{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.Integer64 = i;	}
 
-	unsigned long long toUInteger() const	{ return mDataValue.number.UInteger64;	}
-	unsigned int toUInteger32() const		{ return static_cast<unsigned int>(mDataValue.number.UInteger64);	}
-	void setUInteger(unsigned long long i)	{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.UInteger64 = i;}
+	UInt64 toUInteger() const	{ return mDataValue.number.UInteger64;	}
+	UInt32 toUInteger32() const		{ return static_cast<UInt32>(mDataValue.number.UInteger64);	}
+	void setUInteger(UInt64 i)	{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.UInteger64 = i;}
 
-	long long toInteger64() const			{ return mDataValue.number.Integer64;	}
-	void setInteger64(long long i)			{ mDataType = ASN1TYPE_Integer64;	mDataValue.number.Integer64 = i;	}
+	Int64 toInteger64() const			{ return mDataValue.number.Integer64;	}
+	void setInteger64(Int64 i)			{ mDataType = ASN1TYPE_Integer64;	mDataValue.number.Integer64 = i;	}
 
-	unsigned long long toUnsigned64() const			{ return mDataValue.number.UInteger64;	}
-	void setUnsigned64(unsigned long long i)		{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toUnsigned64() const			{ return mDataValue.number.UInteger64;	}
+	void setUnsigned64(UInt64 i)		{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}
 
-	unsigned long long toGauge() const	{ return toUnsigned64();	}
-	void setGauge(unsigned long long i)	{ mDataType = ASN1TYPE_Gauge;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toGauge() const	{ return toUnsigned64();	}
+	void setGauge(UInt64 i)	{ mDataType = ASN1TYPE_Gauge;	mDataValue.number.UInteger64 = i;	}
 
-	unsigned long long toGauge64() const	{ return toUnsigned64();	}
-	void setGauge64(unsigned long long i)	{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toGauge64() const	{ return toUnsigned64();	}
+	void setGauge64(UInt64 i)	{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}
 
-	unsigned long long toCounter() const	{ return toUnsigned64();	}
-	void setCounter(unsigned long long i)	{ mDataType = ASN1TYPE_Counter;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toCounter() const	{ return toUnsigned64();	}
+	void setCounter(UInt64 i)	{ mDataType = ASN1TYPE_Counter;	mDataValue.number.UInteger64 = i;	}
 
-	unsigned long long toCounter64() const	{ return toUnsigned64();	}
-	void setCounter64(unsigned long long i)	{ mDataType = ASN1TYPE_Counter64;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toCounter64() const	{ return toUnsigned64();	}
+	void setCounter64(UInt64 i)	{ mDataType = ASN1TYPE_Counter64;	mDataValue.number.UInteger64 = i;	}
 
-	unsigned long long toTimeTicks() const	{ return toUnsigned64();	}
-	void setTimeTicks(unsigned long long i)	{ mDataType = ASN1TYPE_TimeTicks;	mDataValue.number.UInteger64 = i;	}
+	UInt64 toTimeTicks() const	{ return toUnsigned64();	}
+	void setTimeTicks(UInt64 i)	{ mDataType = ASN1TYPE_TimeTicks;	mDataValue.number.UInteger64 = i;	}
 
 	const OID &toOID() const		{ return mDataValue.oid;	}
 	void setOID(const OID &oid)		{ mDataType = ASN1TYPE_OBJECTID;	mDataValue.oid = oid;	}
 
 	// Don't use it to print text as OctetString may not contains the \0 ending. Use toDisplayString instead.
-	const StdCharVector &toOctetString() const		{ return mDataValue.octetString;	}
-	void setOctetString(const StdCharVector &str)	{ mDataType = ASN1TYPE_OCTETSTRING;	mDataValue.octetString = str;	}
+	const StdByteVector &toOctetString() const		{ return mDataValue.octetString;	}
+	void setOctetString(const StdByteVector &str)	{ mDataType = ASN1TYPE_OCTETSTRING;	mDataValue.octetString = str;	}
 
-	std::string toDisplayString() const				{ return std::string(mDataValue.octetString.data(), mDataValue.octetString.size());	}
+	StdString toDisplayString() const				{ return mDataValue.octetString.toStdString(); }
 
-	void setData(ASN1::DataType type, const StdCharVector &ba)	{ mDataType = type; mDataValue.octetString = ba;	}
+	void setData(ASN1::DataType type, const StdByteVector &ba)	{ mDataType = type; mDataValue.octetString = ba;	}
 
 	const Utils::IPv4Address &toIPV4() const			{ return mDataValue.ipv4Address;	}
 	void setIPv4(const Utils::IPv4Address &ipv4)		{ mDataValue.ipv4Address = ipv4;	}

@@ -48,9 +48,9 @@ void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 
 void SNMPConn::sendRequest(const SNMP::Encoder &snmpDeco)
 {
-	StdCharVector data = snmpDeco.encodeRequest();
+	StdByteVector data = snmpDeco.encodeRequest();
 
-	Q_ASSERT( mAgentSocket.writeDatagram(data.data(), data.count(), QHostAddress(mAgentAddress), mAgentPort) != -1 );
+	Q_ASSERT( mAgentSocket.writeDatagram( data.chars(), data.count(), QHostAddress(mAgentAddress), mAgentPort) != -1 );
 }
 
 void SNMPConn::sendGetRequest(int version, const OID &oid, const QString &comunity, int requestID)
@@ -90,24 +90,27 @@ void SNMPConn::onDataReceived()
 {
 	if( mAgentSocket.hasPendingDatagrams() )
 	{
-		StdCharVector datagram( static_cast<long long>(mAgentSocket.pendingDatagramSize()) );
-		mAgentSocket.readDatagram( datagram.data(), datagram.count() );
-		SNMP::Encoder snmpDeco;
-		snmpDeco.decodeAll(datagram, includeRasData());
+		StdByteVector datagram( static_cast<Int64>(mAgentSocket.pendingDatagramSize()) );
+		mAgentSocket.readDatagram( datagram.chars(), datagram.count() );
+		SNMP::Encoder snmp;
+		snmp.decodeAll(datagram, includeRawData());
 		if( mTableBaseOID.isEmpty() )
-			emit dataReceived(snmpDeco);
+			emit dataReceived(snmp);
 		else
 		{
-			if( snmpDeco.varbindList().count() &&
-				snmpDeco.varbindList().first().oid().startsWith(mTableBaseOID) )
+			if( snmp.varbindList().count() &&
+				snmp.varbindList().first().oid().startsWith(mTableBaseOID) )
 			{
-				emit tableCellReceived(snmpDeco);
-				sendGetNextRequest(snmpDeco.version(), snmpDeco.varbindList().first().oid(), QString::fromStdString(snmpDeco.comunity()), snmpDeco.requestID()+1);
+				emit tableCellReceived(snmp);
+				sendGetNextRequest( snmp.version(),
+									snmp.varbindList().first().oid(),
+									QString::fromStdString(snmp.comunity()),
+									snmp.requestID()+1 );
 			}
 			else
 			{
 				cancelDiscoverTable();
-				emit tableReceived(snmpDeco.requestID());
+				emit tableReceived(snmp.requestID());
 			}
 		}
 	}

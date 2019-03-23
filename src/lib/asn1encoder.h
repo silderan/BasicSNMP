@@ -31,7 +31,7 @@
 #include "asn1types.h"
 #include "asn1variable.h"
 
-typedef StdList<StdCharVector> StdCharVectorList;
+typedef StdList<StdByteVector> StdByteVectorList;
 
 namespace ASN1 {
 
@@ -63,23 +63,23 @@ public:
 		NotWritable,
 		InconsistentName
 	} mErrorCode;
-	static std::string printableErrorCode(ErrorCode errorCode);
+	static StdString printableErrorCode(ErrorCode errorCode);
 
 private:
 	static bool checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, ASN1::DataType validType);
-	static bool checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, const std::vector<ASN1::DataType> &validTypes);
-	static bool checkDataLength(ErrorCode &errorCode, const StdCharVector &ba, long long dataPos, long long actualLength, long long minLength, long long maxLength = 0xFFFFFFFF);
-	static bool checkDataRoom(ErrorCode &errorCode, const StdCharVector &ba, long long initialDataPos, long long dataLength);
-	static bool getTLVData(ErrorCode &errorCode, const StdCharVector &ba, long long &initialPos, const std::vector<ASN1::DataType> &validTypeList, ASN1::DataType &actualType, long long &length, long long minDataLength, long long maxDataLength);
-	static bool getTLVData(ErrorCode &errorCode, const StdCharVector &ba, long long &initialPos, ASN1::DataType validType, long long &length, long long minDataLength, long long maxDataLength = 0x7FFFFFFF);
-	static bool getTLVData(ErrorCode &errorCode, const StdCharVector &ba, long long &initialPos, ASN1::DataType &validType, long long &length);
+	static bool checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, const StdVector<ASN1::DataType> &validTypes);
+	static bool checkDataLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 dataPos, Int64 actualLength, Int64 minLength, Int64 maxLength = 0xFFFFFFFF);
+	static bool checkDataRoom(ErrorCode &errorCode, const StdByteVector &ba, Int64 initialDataPos, Int64 dataLength);
+	static bool getTLVData(ErrorCode &errorCode, const StdByteVector &ba, Int64 &initialPos, const std::vector<DataType> &validTypeList, ASN1::DataType &actualType, Int64 &length, Int64 minDataLength, Int64 maxDataLength);
+	static bool getTLVData(ErrorCode &errorCode, const StdByteVector &ba, Int64 &initialPos, ASN1::DataType validType, Int64 &length, Int64 minDataLength, Int64 maxDataLength = 0x7FFFFFFF);
+	static bool getTLVData(ErrorCode &errorCode, const StdByteVector &ba, Int64 &initialPos, ASN1::DataType &validType, Int64 &length);
 
 	template<typename T>
 	static inline bool decodeInteger( ErrorCode &errorCode,
 									  T &value,
-									  const StdCharVector &ba,
-									  long long &pos,
-									  long long length,
+									  const StdByteVector &ba,
+									  Int64 &pos,
+									  Int64 length,
 									  bool isUnsigned )
 	{
 		// The first bit must be 0 allways if a unsigned value is encoded.
@@ -103,20 +103,20 @@ private:
 		}
 		return true;
 	}
-	static bool decodeInteger(ErrorCode &errorCode, ASN1::Variable &asnVar, const StdCharVector &ba, long long &pos, long long length);
+	static bool decodeInteger(ErrorCode &errorCode, ASN1::Variable &asnVar, const StdByteVector &ba, Int64 &pos, Int64 length);
 
-	static bool decodeGenericString(ErrorCode &errorCode, StdCharVector &value, const StdCharVector &ba, long long &pos, long long length);
-	static bool decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdCharVector &ba, long long &pos, long long length);
-	static bool decodeNULL(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, long long length);
+	static bool decodeGenericString(ErrorCode &errorCode, StdByteVector &value, const StdByteVector &ba, Int64 &pos, Int64 length);
+	static bool decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdByteVector &ba, Int64 &pos, Int64 length);
+	static bool decodeNULL(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 length);
 
-	static bool getLength(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, long long &length);
-	static void setLength(StdCharVector &ba, long long pos, long long length);
+	static bool getLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length);
+	static void setLength(StdByteVector &ba, Int64 pos, Int64 length);
 
 public:
 	template<typename T>
-	static inline StdCharVector encodeInteger(T value, bool isUnsigned)
+	static inline StdByteVector encodeInteger(T value, bool isUnsigned)
 	{
-		StdCharVector ba;
+		StdByteVector ba;
 		ba.append( ASN1TYPE_INTEGER );
 		// For this small values, below 127, no need to go through such complicated code.
 		if( !(value & ~static_cast<T>(0x7F))  )
@@ -131,14 +131,14 @@ public:
 
 		// Mask 9 first bits of the value.
 		// This will create 0xFF80000... value.
-		quint64 mask = static_cast<quint64>(0x1FF) << ((8 * (sizeof(T) - 1)) - 1);
-		quint32 integerSize = sizeof(value);
+		UInt64 mask = static_cast<UInt64>(0x1FF) << ((8 * (sizeof(T) - 1)) - 1);
+		UInt32 integerSize = sizeof(value);
 
 		// Let's lookup for the 9 most significant bits if are all 0 or 1.
 		// As could be de value 0xFF00, the use of 0xFF8 mask is necessary.
 		while( (integerSize > 1) &&
-			   (((static_cast<quint64>(value) & mask) == 0) ||		// All 0
-				(((static_cast<quint64>(value) & mask) == mask) && !isUnsigned) ))	// All 1
+			   (((static_cast<UInt64>(value) & mask) == 0) ||		// All 0
+				(((static_cast<UInt64>(value) & mask) == mask) && !isUnsigned) ))	// All 1
 		{
 			integerSize--;
 			value <<= 8;	// Eliminates the 8 most significant bits.
@@ -147,18 +147,18 @@ public:
 		if( isUnsigned )
 			ba.append( static_cast<char>(0x00) );
 		// Mask 8 first bits: 0xFF00......
-		mask = static_cast<quint64>(0xFF) << (8 * (sizeof(T) -1));
+		mask = static_cast<UInt64>(0xFF) << (8 * (sizeof(T) -1));
 		while( integerSize-- )
 		{
-			ba.append( static_cast<char>((static_cast<quint64>(value) & mask) >> (8*(sizeof(T)-1))) );
+			ba.append( static_cast<char>((static_cast<UInt64>(value) & mask) >> (8*(sizeof(T)-1))) );
 			value <<= 8;
 		}
 
 		return ba;
 	}
-	static inline bool decodeInteger(ErrorCode &errorCode, ASN1::Variable &asnVar, const StdCharVector &ba, long long &pos)
+	static inline bool decodeInteger(ErrorCode &errorCode, ASN1::Variable &asnVar, const StdByteVector &ba, Int64 &pos)
 	{
-		long long length;
+		Int64 length;
 
 		static std::vector<ASN1::DataType> validNumberTypes = {
 			ASN1TYPE_INTEGER,
@@ -176,9 +176,9 @@ public:
 		return decodeInteger(errorCode, asnVar, ba, pos, length);
 	}
 	template<typename T>
-	static inline bool decodeInteger(ErrorCode &errorCode, T &number, const StdCharVector &ba, long long &pos, bool isUnsigned)
+	static inline bool decodeInteger(ErrorCode &errorCode, T &number, const StdByteVector &ba, Int64 &pos, bool isUnsigned)
 	{
-		long long length;
+		Int64 length;
 		static std::vector<ASN1::DataType> validNumberTypes = {
 			ASN1TYPE_INTEGER,
 			ASN1TYPE_Counter,
@@ -194,38 +194,38 @@ public:
 		return decodeInteger(errorCode, number, ba, pos, length, isUnsigned);
 	}
 
-	static bool decodeGenericString(ErrorCode &errorCode, StdCharVector &value, const StdCharVector &ba, long long &pos);
-	static bool decodeOctetString(ErrorCode &errorCode, StdCharVector &value, const StdCharVector &ba, long long &pos);
-	static StdCharVector encodeOctetString(const StdCharVector &value);
-	static StdCharVector encodeOctetString(const std::string &value);
+	static bool decodeGenericString(ErrorCode &errorCode, StdByteVector &value, const StdByteVector &ba, Int64 &pos);
+	static bool decodeOctetString(ErrorCode &errorCode, StdByteVector &value, const StdByteVector &ba, Int64 &pos);
+	static StdByteVector encodeOctetString(const StdByteVector &value);
+	static StdByteVector encodeOctetString(const StdString &value);
 
-	static bool decodeObjectIdentifierValue(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, OIDValue &oidValue);
-	static void encodeObjectIdentifierValue(const OIDValue &oidValue, StdCharVector &ba);
+	static bool decodeObjectIdentifierValue(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, OIDValue &oidValue);
+	static void encodeObjectIdentifierValue(const OIDValue &oidValue, StdByteVector &ba);
 
-	static bool decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdCharVector &ba, long long &pos);
-	static bool decodeObjectIdentifier(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdCharVector &ba, long long &pos);
-	static StdCharVector encodeObjectIdentifier(const OID &oid);
+	static bool decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdByteVector &ba, Int64 &pos);
+	static bool decodeObjectIdentifier(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdByteVector &ba, Int64 &pos);
+	static StdByteVector encodeObjectIdentifier(const OID &oid);
 
-	static bool decodeNULL(ErrorCode &errorCode, const StdCharVector &ba, long long &pos);
-	static StdCharVector encodeNULL();
+	static bool decodeNULL(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos);
+	static StdByteVector encodeNULL();
 
-	static bool decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdCharVector &ba, long long &pos, long long length);
-	static bool decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdCharVector &ba, long long &pos);
-	static bool decodeIPv4Address(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdCharVector &ba, long long &pos);
-	static StdCharVector encodeIPv4Address(const std::string &ipv4Address);
-	static StdCharVector encodeIPv4Address(const Utils::IPv4Address &ipv4Address);
+	static bool decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos, Int64 length);
+	static bool decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos);
+	static bool decodeIPv4Address(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdByteVector &ba, Int64 &pos);
+	static StdByteVector encodeIPv4Address(const StdString &ipv4Address);
+	static StdByteVector encodeIPv4Address(const Utils::IPv4Address &ipv4Address);
 
-	static bool decodeUnknown(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, long long length, ASN1::DataType type, ASN1::Variable &data);
-	static bool decodeUnknown(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, ASN1::Variable &asn1Var, StdCharVector *rawData);
-	static StdCharVector encodeUnknown(const ASN1::Variable &pduVariable);
+	static bool decodeUnknown(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 length, ASN1::DataType type, ASN1::Variable &data);
+	static bool decodeUnknown(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, ASN1::Variable &asn1Var, StdByteVector *rawData);
+	static StdByteVector encodeUnknown(const ASN1::Variable &pduVariable);
 
-	static bool decodeComplex(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, long long &length, ASN1::DataType &code, StdCharVectorList &baList );
-	static StdCharVector encodeList(ASN1::DataType asn1Type, const StdCharVectorList &baList );
+	static bool decodeComplex(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length, ASN1::DataType &code, StdByteVectorList &baList );
+	static StdByteVector encodeList(ASN1::DataType asn1Type, const StdByteVectorList &baList );
 
-	static bool decodeSequence(ErrorCode &errorCode, const StdCharVector &ba, long long &pos, long long &length);
-	static StdCharVector encodeSequence(const StdCharVectorList &baList);
+	static bool decodeSequence(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length);
+	static StdByteVector encodeSequence(const StdByteVectorList &baList);
 
-	static bool decodePDURequest(ErrorCode &errorCode, const StdCharVector &ba, long long &pos);
+	static bool decodePDURequest(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos);
 };
 
 }	// namespace ASN1

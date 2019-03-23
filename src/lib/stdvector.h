@@ -24,19 +24,20 @@
 #define STDVECTOR_H
 
 #include <vector>
+#include "basic_types.h"
 
 template<typename T>
 class StdVector : public std::vector<T>
 {
 public:
 	StdVector() = default;
-	StdVector( const std::vector<T> &v)
+	StdVector( const std::vector<T> &v )
 		: std::vector<T> (v)
 	{	}
 	StdVector( typename std::vector<T>::size_type s )
 		: std::vector<T> (s)
 	{	}
-	StdVector( long long initialSize )
+	StdVector( Int64 initialSize )
 		: std::vector<T> (initialSize)
 	{	}
 	StdVector( int initialSize )
@@ -63,22 +64,17 @@ public:
 	StdVector( const StdVector<T> &v )
 		: std::vector<T> (v)
 	{	}
-//	StdVector( const StdVector<T> &v )
-//		: std::vector<T>(static_cast<long long>(v.size()))
-//	{
-//		for( typename StdVector<T>::size_type i = 0; i < v.size(); ++i )
-//			at(i) = v.at(i);
-//	}
-	long long count()	const	{ return static_cast<long long>(std::vector<T>::size());	}
-	void resize(long long i)	{ std::vector<T>::resize(static_cast<typename std::vector<T>::size_type>(i));	}
+
+	Int64 count()	const	{ return static_cast<Int64>(std::vector<T>::size());	}
+	void resize(Int64 i)	{ std::vector<T>::resize(static_cast<typename std::vector<T>::size_type>(i));	}
 
 	void append(const T &t)					{ return this->push_back(t);	}
 	void append(const StdVector<T> &t)		{ return this->push_back(t);	}
 
-	const T &operator[](long long i) const	{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}
-	T &operator[](long long i)				{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}
-	const T &at(long long i) const	{ return std::vector<T>::at(static_cast<typename std::vector<T>::size_type>(i));	}
-	T &at(long long i)				{ return std::vector<T>::at(static_cast<typename std::vector<T>::size_type>(i));	}
+	const T &operator[](Int64 i) const	{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}
+	T &operator[](Int64 i)				{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}
+	const T &at(Int64 i) const	{ return std::vector<T>::at(static_cast<typename std::vector<T>::size_type>(i));	}
+	T &at(Int64 i)				{ return std::vector<T>::at(static_cast<typename std::vector<T>::size_type>(i));	}
 
 	bool isEmpty() const	{ return count() == 0;	}
 };

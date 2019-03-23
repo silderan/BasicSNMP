@@ -23,10 +23,6 @@
 #ifndef SNMPENCODER_H
 #define SNMPENCODER_H
 
-#ifdef QT_CORE_LIB
-#include <QString>
-#endif
-
 #include "asn1variable.h"
 #include "asn1types.h"
 #include "asn1encoder.h"
@@ -38,7 +34,7 @@ namespace SNMP {
 class Encoder
 {
 	int mVersion;
-	std::string mComunity;
+	StdString mComunity;
 	int mRequestID;
 	ASN1::Encoder::ErrorCode mErrorCode;
 	int mErrorObjectIndex;
@@ -51,16 +47,12 @@ public:
 	int version() const				{ return mVersion;		}
 	void setVersion(int v)			{ mVersion = v;			}
 
-	const std::string &comunity() const		{ return mComunity;	}
-	void setComunity(const std::string &c)	{ mComunity = c;	}
-	void setComunity(const StdCharVector &c){ mComunity = std::string(c.data(), c.size()); }
+	const StdString &comunity() const		{ return mComunity;	}
+	void setComunity(const StdString &c)	{ mComunity = c;	}
+	void setComunity(const StdByteVector &c){ mComunity = c.toStdString(); }
 
-	void setComunity(const char *c)			{ mComunity = std::string(c);	}
+	void setComunity(const char *c)			{ mComunity = StdString(c);	}
 
-#ifdef QT_CORE_LIB
-	QString qComunity() const				{ return QString::fromStdString(mComunity);	}
-	void setComunity(const QString &c)		{ mComunity = c.toStdString();	}
-#endif
 	int requestID() const		{ return mRequestID;	}
 	void setRequestID(int r)	{ mRequestID = r;		}
 
@@ -79,20 +71,20 @@ public:
 	const PDUVarbindList &varbindList()	const	{ return mVarbindList;	}
 	void setObjectIdentifier(const OID &oid)	{ addPDUVar(oid);	}
 
-	void setupRequest(int version, const std::string &comunity, int requestID, ASN1::DataType requestCode, const PDUVarbindList &varbindList);
-	void setupRequest(int version, const std::string &comunity, int requestID, ASN1::DataType requestCode, const OIDList &oidList);
-	void setupGetRequest(int version, const std::string &comunity, int requestID, const OID &oid);
-	void setupGetRequest(int version, const std::string &comunity, int requestID, const OIDList &oidList);
-	void setupGetNextRequest(int version, const std::string &comunity, int requestID, const OID &oid);
-	void setupGetNextRequest(int version, const std::string &comunity, int requestID, const OIDList &oidList);
+	void setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const PDUVarbindList &varbindList);
+	void setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const OIDList &oidList);
+	void setupGetRequest(int version, const StdString &comunity, int requestID, const OID &oid);
+	void setupGetRequest(int version, const StdString &comunity, int requestID, const OIDList &oidList);
+	void setupGetNextRequest(int version, const StdString &comunity, int requestID, const OID &oid);
+	void setupGetNextRequest(int version, const StdString &comunity, int requestID, const OIDList &oidList);
 
-	void setupSetRequest(int version, const std::string &comunity, int requestID, const PDUVarbindList &varbindList);
-	void setupSetRequest(int version, const std::string &comunity, int requestID, const OID &oid, const ASN1::Variable &asn1Var);
+	void setupSetRequest(int version, const StdString &comunity, int requestID, const PDUVarbindList &varbindList);
+	void setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1::Variable &asn1Var);
 
 	void setError(ASN1::Encoder::ErrorCode code, int index)	{ mErrorCode = code; mErrorObjectIndex = index;}
 
-	bool decodeAll(const StdCharVector &ba, bool includeRawData);
-	StdCharVector encodeRequest() const;
+	bool decodeAll(const StdByteVector &ba, bool includeRawData);
+	StdByteVector encodeRequest() const;
 };
 
 } // namespace SNMP

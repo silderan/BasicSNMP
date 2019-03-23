@@ -219,7 +219,7 @@ void MainWindow::addReplyRow(const OID &oid, const QString &valueType, const QSt
 	QTableWidgetItem *item;
 
 	ui->replyTable->insertRow(row);
-	ui->replyTable->setItem(row, 0, item = new QTableWidgetItem(oid.toQString()) );
+	ui->replyTable->setItem(row, 0, item = new QTableWidgetItem(QString::fromStdString(oid.toStdString())) );
 	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
 	ui->replyTable->setItem(row, 1, item = new QTableWidgetItem(QString("%1: %2").arg(valueType, value)) );
 	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
@@ -253,7 +253,10 @@ void MainWindow::onSNMPDataReceived(const SNMP::Encoder &snmp)
 void MainWindow::on_sendGetRequest_clicked()
 {
 	snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
-	snmpConn.sendGetRequest( ui->version->currentData(Qt::UserRole).toInt(), ui->OIDLineEdit->text(), ui->comunity->currentText(), ++mRequestID );
+	snmpConn.sendGetRequest( ui->version->currentData(Qt::UserRole).toInt(),
+							 ui->OIDLineEdit->text(),
+							 ui->comunity->currentText(),
+							 ++mRequestID );
 }
 
 void MainWindow::on_sendGetNextRequest_clicked()
@@ -274,7 +277,7 @@ void MainWindow::on_sendSetRequest_clicked()
 		asn1Var.setInteger( ui->value->text().toInt() );
 		break;
 	case ASN1TYPE_OCTETSTRING:
-		asn1Var.setOctetString( ui->value->text() );
+		asn1Var.setOctetString( ui->value->text().toStdString() );
 		break;
 	default:
 		ui->statusBar->showMessage( tr("Envio de datos tipo %1 no implementado aun")
@@ -540,7 +543,7 @@ int MainWindow::matchKey(OID keys)
 	{
 		for( col = 0; col < keys.count(); ++col )
 		{
-			if( !ui->snmpTable->item(row, col) || (keys[col] != ui->snmpTable->item(row, col)->text()) )
+			if( !ui->snmpTable->item(row, col) || (keys[col] != ui->snmpTable->item(row, col)->text().toStdString()) )
 				break;
 		}
 		// Matched
@@ -552,7 +555,7 @@ int MainWindow::matchKey(OID keys)
 	{
 		ui->rows->setValue(row+1);
 		for( col = 0; col < keys.count(); ++col )
-			ui->snmpTable->setItem(row, col, new QTableWidgetItem(keys[col].toQString()) );
+			ui->snmpTable->setItem(row, col, new QTableWidgetItem( QString::fromStdString(keys[col].toStdString())) );
 	}
 	return row;
 }
@@ -603,7 +606,7 @@ void MainWindow::onTableCellReceived(const SNMP::Encoder &snmp)
 		ui->keyCount->setValue( static_cast<int>(tableInfo.keyIndexes.count()) );
 	}
 
-	if( tableInfo.column >= static_cast<unsigned long long>(ui->columnCount->value()) )
+	if( tableInfo.column >= static_cast<UInt64>(ui->columnCount->value()) )
 	{
 		ui->columnCount->setValue( static_cast<int>(tableInfo.column) );
 		mTableColumnInfoList[tableInfo.column + tableInfo.keyIndexes.count() - 1].valueType = tableInfo.varbind.type();
@@ -651,7 +654,7 @@ void MainWindow::on_statusColumn_currentIndexChanged(int index)
 void MainWindow::on_sendTable_clicked()
 {
 	int col;
-	OID oidBase = ui->oidBase->text();
+	OID oidBase = ui->oidBase->text().toStdString();
 	int statusColumnIndex = mTableColumnInfoList.statusColumnIndex();
 	if( oidBase.count() < 2 )
 	{
@@ -683,10 +686,10 @@ void MainWindow::on_sendTable_clicked()
 	SNMP::Encoder snmp;
 	snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
 	snmp.setVersion( ui->version->currentData(Qt::UserRole).toInt() );
-	snmp.setComunity( ui->comunity->currentText() );
+	snmp.setComunity( ui->comunity->currentText().toStdString() );
 	snmp.setRequestType( ASN1TYPE_SetRequestPDU );
 	OID keys;
-	keys.reserve( static_cast<unsigned long long>(mTableColumnInfoList.keyColumnCount()) );
+	keys.reserve( static_cast<UInt64>(mTableColumnInfoList.keyColumnCount()) );
 	for( int row = 0; row < ui->snmpTable->rowCount(); ++row )
 	{
 		keys.clear();

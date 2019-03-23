@@ -36,10 +36,10 @@ template<typename T>
 void testOneInteger(T value, const char *typeName, bool isSigned, const char *buff, int buffSize)
 {
 	T newVal;
-	StdCharVector ba(buff, buffSize);
+	StdByteVector ba(buff, buffSize);
 	std::cout << ((ASN1::Encoder::encodeInteger(static_cast<T>(value), isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
 
-	long long pos = 0;
+	Int64 pos = 0;
 	ASN1::Encoder::ErrorCode errorCode;
 	ASN1::Encoder::decodeInteger( errorCode, newVal, ba, pos, isSigned );
 	std::cout << ((newVal == value) ? "Ok" : "Fail") << " getInteger<" << typeName << ">("<<value<<") " << newVal << " Error code=" << errorCode << std::endl;
@@ -105,12 +105,12 @@ void testIntegers()
 	TEST_ONE_INTEGER( 1, quint16, true, "\x02\x01\x01" );
 }
 
-void testOneOctetString(const std::string &value, const char *buff, int buffSize)
+void testOneOctetString(const StdString &value, const char *buff, int buffSize)
 {
-	StdCharVector ba(buff, buffSize);
+	StdByteVector ba(buff, buffSize);
 	std::cout << ((ASN1::Encoder::encodeOctetString(value) == ba) ? "Ok" : "Fail") << " setOctetString("<< value <<") " << std::endl;
 
-	long long pos = 0;
+	Int64 pos = 0;
 	ASN1::Encoder::ErrorCode errorCode;
 	ASN1::Variable asn1Var;
 	ASN1::Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
@@ -136,10 +136,10 @@ void testOctetStrings()
 
 void testOneOID(const OID &oid, const char *buff, int buffSize)
 {
-	StdCharVector ba(buff, buffSize);
+	StdByteVector ba(buff, buffSize);
 	std::cout << ((ASN1::Encoder::encodeObjectIdentifier(oid) == ba) ? "Ok" : "Fail") << " encodeObjectIdentifier("<<oid.toStdString()<<") " << std::endl;
 
-	long long pos = 0;
+	Int64 pos = 0;
 	ASN1::Encoder::ErrorCode errorCode;
 	ASN1::Variable asn1Var;
 	ASN1::Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
@@ -160,10 +160,10 @@ void testOIDs()
 
 void testOneNULL(const char *buff, int buffSize)
 {
-	StdCharVector ba(buff, buffSize);
+	StdByteVector ba(buff, buffSize);
 	std::cout << ((ASN1::Encoder::encodeNULL() == ba) ? "Ok" : "Fail") << " encodeNULL()" << std::endl;
 
-	long long pos = 0;
+	Int64 pos = 0;
 	ASN1::Encoder::ErrorCode errorCode;
 	std::cout << (ASN1::Encoder::decodeNULL(errorCode, ba, pos) ? "Ok" : "Fail") << " decodeNULL() " << " ErrorCode=" << errorCode << std::endl;
 
@@ -188,9 +188,9 @@ void testSNMPRequest()
 	const char buff[] = "\x30\x2c\x02\x01\x00\x04\x07\x70\x72\x69\x76\x61\x74\x65\xA0\x1E\x02\x01\x01\x02\x01\x00\x02\x01\x00\x30\x13\x30\x11\x06\x0D\x2B\x06\x01\x04\x01\x94\x78\x01\x02\x07\x03\x02\x00\x05\x00";
 	int length = sizeof(buff);
 	length /= sizeof(buff[0]);
-	StdCharVector checker( buff, length-1 );
+	StdByteVector checker( buff, length-1 );
 
-	StdCharVector encoded = snmpRequest.encodeRequest();
+	StdByteVector encoded = snmpRequest.encodeRequest();
 	std::cout << ((encoded == checker) ? "Ok" : "Fail") << " SNMPDecoder::encodeRequest()" << std::endl;
 
 	SNMP::Encoder snmpResponce;
