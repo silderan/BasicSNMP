@@ -1,3 +1,25 @@
+/**************************************************************************
+
+  Copyright 2015-2019 Rafael Dellà Bort. silderan (at) gmail (dot) com
+
+  This file is part of BasicSNMP
+
+  BasicSNMP is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Lesser General Public License as
+  published by the Free Software Foundation, either version 3 of
+  the License, or (at your option) any later version.
+
+  BasicSNMP is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  and GNU Lesser General Public License. along with BasicSNMP.
+  If not, see <http://www.gnu.org/licenses/>.
+
+**************************************************************************/
+
 #include "qconstantsstrings.h"
 #include "utils.h"
 
@@ -64,18 +86,34 @@ QString asn1PrintableValue(const ASN1::Variable &asn1Var)
 {
 	switch( asn1Var.type() )
 	{
-	case ASN1TYPE_INTEGER:		return  QString::number( asn1Var.toUInteger()) ;
-	case ASN1TYPE_NULL:			return  "<null>";
-	case ASN1TYPE_Gauge:		return  QString::number( asn1Var.toGauge() );
-	case ASN1TYPE_Counter:		return  QString::number( asn1Var.toCounter() );
-	case ASN1TYPE_Counter64:	return  QString::number( asn1Var.toCounter64() );
-	case ASN1TYPE_Integer64:	return  QString::number( asn1Var.toInteger64() );
-	case ASN1TYPE_Unsigned64:	return  QString::number( asn1Var.toUnsigned64() );
+	case ASN1TYPE_BOOLEAN:		return asn1Var.toBoolean() ? "true" : "false";
+	case ASN1TYPE_INTEGER:		return QString::number( asn1Var.toUInteger() );
+	case ASN1TYPE_NULL:			return "<null>";
+	case ASN1TYPE_OBJECTID:		return QString::fromStdString( asn1Var.toOID().toStdString() );
 
-	case ASN1TYPE_OCTETSTRING:	return  QString::fromStdString( asn1Var.toDisplayString() );
-	case ASN1TYPE_OBJECTID:		return  QString::fromStdString( asn1Var.toOID().toStdString() );
+	case ASN1TYPE_OCTETSTRING:
+	case ASN1TYPE_NumericString:
+	case ASN1TYPE_TeletextString:
+	case ASN1TYPE_VideoString:
+	case ASN1TYPE_IA5String:
+	case ASN1TYPE_GraphicString:
+	case ASN1TYPE_GeneralString:
+	case ASN1TYPE_CharacterString:
+		return QString::fromStdString( asn1Var.toDisplayString() );
 
-	case ASN1TYPE_IPv4Address:	return  QString::fromStdString( Utils::ipv4AddressToStdString(asn1Var.toIPV4()) );
+	case ASN1TYPE_UTCTime:			return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
+	case ASN1TYPE_GeneralizeTime:	return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
+
+	case ASN1TYPE_Counter:		return QString::number( asn1Var.toCounter() );
+	case ASN1TYPE_Gauge:		return QString::number( asn1Var.toGauge() );
+	case ASN1TYPE_TimeTicks:	return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
+//	case ASN1TYPE_Float:		return QString::number( asn1Var.toFloat() );
+//	case ASN1TYPE_Double:		return QString::number( asn1Var.toDouble() );
+	case ASN1TYPE_Counter64:	return QString::number( asn1Var.toCounter64() );
+	case ASN1TYPE_Integer64:	return QString::number( asn1Var.toInteger64() );
+	case ASN1TYPE_Unsigned64:	return QString::number( asn1Var.toUnsigned64() );
+
+	case ASN1TYPE_IPv4Address:	return QString::fromStdString( Utils::ipv4AddressToStdString(asn1Var.toIPV4()) );
 	}
 	return QString("<no displayable>");
 }

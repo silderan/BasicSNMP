@@ -30,7 +30,6 @@ SOURCES += \
 	QIniFile.cpp \
     lib/asn1types.cpp \
     lib/snmptable.cpp \
-    lib/pduvarbind.cpp \
     lib/asn1variable.cpp \
     lib/asn1encoder.cpp \
     lib/snmpencoder.cpp \
