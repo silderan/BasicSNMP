@@ -99,7 +99,7 @@ QString asn1PrintableValue(const ASN1::Variable &asn1Var)
 	case ASN1TYPE_GraphicString:
 	case ASN1TYPE_GeneralString:
 	case ASN1TYPE_CharacterString:
-		return QString::fromStdString( asn1Var.toDisplayString() );
+		return QString::fromStdString( asn1Var.toStdString() );
 
 	case ASN1TYPE_UTCTime:			return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
 	case ASN1TYPE_GeneralizeTime:	return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
@@ -157,6 +157,42 @@ QString printableErrorCode(const SNMP::Encoder &snmp)
 		return QString("%1 in object %2").arg(printableErrorCode(snmp.errorCode())).arg(snmp.errorObjectIndex());
 
 	return printableErrorCode(snmp.errorCode());
+}
+
+const QMap<SNMP::EntryStatus, QString> &entryStatusInfoMap()
+{
+	static QMap<SNMP::EntryStatus, QString> infoMap =
+	{
+		{SNMP::EntryStatus::valid,			"EntryStatus: valid"},
+		{SNMP::EntryStatus::createRequest,	"EntryStatus: createRequest"},
+		{SNMP::EntryStatus::underCreation,	"EntryStatus: underCreation"},
+		{SNMP::EntryStatus::invalid,		"EntryStatus: invalid"}
+	};
+	return infoMap;
+}
+
+QString entryStatusName(SNMP::EntryStatus es)
+{
+	return entryStatusInfoMap().value( es, "EntryStatus: error-code" );
+}
+
+const QMap<SNMP::StatusRow, QString> &statusRowInfoMap()
+{
+	static QMap<SNMP::StatusRow, QString> infoMap =
+	{
+		{SNMP::StatusRow::active,			"EntryStatus: valid"},
+		{SNMP::StatusRow::notInService,		"EntryStatus: notInService"},
+		{SNMP::StatusRow::notReady,			"EntryStatus: notReady"},
+		{SNMP::StatusRow::createAndGo,		"EntryStatus: createAndGo"},
+		{SNMP::StatusRow::createAndWait,	"EntryStatus: createAndWait"},
+		{SNMP::StatusRow::destroy,			"EntryStatus: destroy"}
+	};
+	return infoMap;
+}
+
+QString statusRowName(SNMP::StatusRow sr)
+{
+	return statusRowInfoMap().value( sr, "EntryStatus: error-code" );
 }
 
 };

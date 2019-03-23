@@ -114,7 +114,7 @@ void testOneOctetString(const StdString &value, const char *buff, int buffSize)
 	ASN1::Encoder::ErrorCode errorCode;
 	ASN1::Variable asn1Var;
 	ASN1::Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
-	std::cout << (asn1Var.toDisplayString() == value ? "Ok" : "Fail") << " getOctetString() " << " " << asn1Var.toDisplayString() << " ErrorCode=" << errorCode << std::endl;
+	std::cout << (asn1Var.toStdString() == value ? "Ok" : "Fail") << " getOctetString() " << " " << asn1Var.toStdString() << " ErrorCode=" << errorCode << std::endl;
 
 	std::cout << std::endl;
 }

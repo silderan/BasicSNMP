@@ -26,7 +26,7 @@
 #include "stdcharvector.h"
 
 #include "asn1types.h"
-#include "utils.h"
+#include "../utils.h"
 #include "oid.h"
 
 namespace ASN1 {
@@ -59,10 +59,6 @@ class Variable
 			: isNegative(false)
 		{
 		}
-		~Value()
-		{
-
-		}
 	} mDataValue;
 
 public:
@@ -70,12 +66,6 @@ public:
 		: mDataType(ASN1TYPE_NULL)
 	{
 	}
-	Variable( const Variable &pduVar )
-		: mDataType(pduVar.mDataType)
-	{
-		*this = pduVar;
-	}
-	Variable &operator =(const Variable &pduVar);
 
 	static int maxNumberSize()				{ return sizeof(double);	}
 	ASN1::DataType type() const				{ return mDataType;		}
@@ -86,13 +76,13 @@ public:
 	bool toBoolean()const				{ return mDataValue.number.boolean;	}
 	void setBoolean(bool b)				{ mDataType = ASN1TYPE_BOOLEAN;	mDataValue.number.boolean = b;	}
 
-	Int64 toInteger() const			{ return mDataValue.number.Integer64;	}
+	Int64 toInteger() const				{ return mDataValue.number.Integer64;	}
 	int toInteger32() const				{ return static_cast<int>(mDataValue.number.UInteger64);	}
-	void setInteger(Int64 i)		{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.Integer64 = i;	}
+	void setInteger(Int64 i)			{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.Integer64 = i;	}
 
-	UInt64 toUInteger() const	{ return mDataValue.number.UInteger64;	}
-	UInt32 toUInteger32() const		{ return static_cast<UInt32>(mDataValue.number.UInteger64);	}
-	void setUInteger(UInt64 i)	{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.UInteger64 = i;}
+	UInt64 toUInteger() const			{ return mDataValue.number.UInteger64;	}
+	UInt32 toUInteger32() const			{ return static_cast<UInt32>(mDataValue.number.UInteger64);	}
+	void setUInteger(UInt64 i)			{ mDataType = ASN1TYPE_INTEGER;	mDataValue.number.UInteger64 = i;}
 
 	Int64 toInteger64() const			{ return mDataValue.number.Integer64;	}
 	void setInteger64(Int64 i)			{ mDataType = ASN1TYPE_Integer64;	mDataValue.number.Integer64 = i;	}
@@ -118,11 +108,11 @@ public:
 	const OID &toOID() const		{ return mDataValue.oid;	}
 	void setOID(const OID &oid)		{ mDataType = ASN1TYPE_OBJECTID;	mDataValue.oid = oid;	}
 
-	// Don't use it to print text as OctetString may not contains the \0 ending. Use toDisplayString instead.
+	// Don't use it to print text as OctetString may not contains the \0 ending. Use toStdString instead.
 	const StdByteVector &toOctetString() const		{ return mDataValue.octetString;	}
 	void setOctetString(const StdByteVector &str)	{ mDataType = ASN1TYPE_OCTETSTRING;	mDataValue.octetString = str;	}
 
-	StdString toDisplayString() const				{ return mDataValue.octetString.toStdString(); }
+	StdString toStdString() const					{ return mDataValue.octetString.toStdString(); }
 
 	void setData(ASN1::DataType type, const StdByteVector &ba)	{ mDataType = type; mDataValue.octetString = ba;	}
 

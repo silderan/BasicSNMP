@@ -64,16 +64,24 @@ public:
 		case SNMP::SMIVersion::SMIv1:
 		{
 			QComboBox *cb = new QComboBox(parent);
-			for( auto it : SNMP::entryStatusInfoMap() )
-				cb->addItem( it.second.data(), static_cast<int>(it.first) );
+			QMapIterator<SNMP::EntryStatus, QString> it(SNMPConstants::entryStatusInfoMap());
+			while( it.hasNext() )
+			{
+				it.next();
+				cb->addItem( it.value(), it.key() );
+			}
 
 			return cb;
 		}
 		case SNMP::SMIVersion::SMIv2:
 		{
 			QComboBox *cb = new QComboBox(parent);
-			for( auto it : SNMP::entryStatusInfoMap() )
-				cb->addItem( it.second.data(), static_cast<int>(it.first) );
+			QMapIterator<SNMP::StatusRow, QString> it(SNMPConstants::statusRowInfoMap());
+			while( it.hasNext() )
+			{
+				it.next();
+				cb->addItem( it.value(), it.key() );
+			}
 
 			return cb;
 		}
@@ -578,10 +586,10 @@ void MainWindow::updateStatusColumnValues(int col)
 			switch( mSMIVersion )
 			{
 			case SNMP::SMIVersion::SMIv1:
-				ui->snmpTable->item(row, col)->setText( SNMP::qEntryStatusName( static_cast<SNMP::EntryStatus>(statusRow)) );
+				ui->snmpTable->item(row, col)->setText( SNMPConstants::entryStatusName( static_cast<SNMP::EntryStatus>(statusRow)) );
 				break;
 			case SNMP::SMIVersion::SMIv2:
-				ui->snmpTable->item(row, col)->setText( SNMP::qStatusRowName( static_cast<SNMP::StatusRow>(statusRow)) );
+				ui->snmpTable->item(row, col)->setText( SNMPConstants::statusRowName( static_cast<SNMP::StatusRow>(statusRow)) );
 				break;
 			default:
 				ui->snmpTable->item(row, col)->setText( "Choose SMIVersion" );

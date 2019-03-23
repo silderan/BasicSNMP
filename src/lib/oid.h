@@ -23,9 +23,9 @@
 #ifndef OID_H
 #define OID_H
 
-#include <utils.h>
 #include <string>
 
+#include "../utils.h"
 #include "types.h"
 
 class OIDValue
@@ -102,6 +102,15 @@ public:
 			return false;
 		for( int i = 0; i < oid.count(); ++i )
 			if( oid.at(i) != at(i) )
+				return false;
+		return true;
+	}
+	bool endsWith(const OID &oid) const
+	{
+		if( oid.count() > count() )
+			return false;
+		for( int i = 1; i <= oid.count(); ++i )
+			if( oid.at(oid.count()-i) != at(count()-i) )
 				return false;
 		return true;
 	}

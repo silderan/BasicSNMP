@@ -24,39 +24,31 @@
 
 namespace SNMP {
 
-const std::map<EntryStatus, StdString> &entryStatusInfoMap()
+
+TableRow::TableRow(Int64 columnCount, Int64 keyCount)
 {
-	static std::map<EntryStatus, StdString> infoMap =
-	{
-		{EntryStatus::valid,			"EntryStatus: valid"},
-		{EntryStatus::createRequest,	"EntryStatus: createRequest"},
-		{EntryStatus::underCreation,	"EntryStatus: underCreation"},
-		{EntryStatus::invalid,			"EntryStatus: invalid"}
-	};
-	return infoMap;
+	mColumns.resize(columnCount);
+	mKeys.resize(keyCount);
 }
 
-StdString entryStatusName(EntryStatus es)
+bool TableRow::setColumn(Int64 colIndex, const ASN1::Variable &asn1Var)
 {
-	return Utils::value( entryStatusInfoMap(), es, StdString("EntryStatus: error-code") );
+	if( (colIndex >= 0) && (colIndex < mColumns.count()) )
+	{
+		column(colIndex) = asn1Var;
+		return true;
+	}
+	return false;
 }
 
-const std::map<StatusRow, StdString> &statusRowInfoMap()
+bool TableRow::setKey(Int64 keyIndex, const OIDValue &oidValue)
 {
-	static std::map<StatusRow, StdString> infoMap =
+	if( (keyIndex >= 0) && (keyIndex < mKeys.count()) )
 	{
-		{StatusRow::active,			"EntryStatus: valid"},
-		{StatusRow::notInService,	"EntryStatus: notInService"},
-		{StatusRow::notReady,		"EntryStatus: notReady"},
-		{StatusRow::createAndGo,	"EntryStatus: createAndGo"},
-		{StatusRow::createAndWait,	"EntryStatus: createAndWait"},
-		{StatusRow::destroy,		"EntryStatus: destroy"}
-	};
-	return infoMap;
-}
-StdString statusRowName(StatusRow sr)
-{
-	return Utils::value( statusRowInfoMap(), sr, StdString("EntryStatus: error-code") );
+		key(keyIndex) = oidValue;
+		return true;
+	}
+	return false;
 }
 
 } // namespace SNMP

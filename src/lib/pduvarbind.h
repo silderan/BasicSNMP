@@ -52,12 +52,6 @@ public:
 		ASN1::Variable::clear();
 		mRawValue.clear();
 	}
-	PDUVarbind &operator=(const PDUVarbind &other)
-	{
-		mOID = other.mOID;
-		mRawValue = other.mRawValue;
-		return *this;
-	}
 	const StdByteVector &rawValue()const	{ return mRawValue;	}
 	StdByteVector &rawValue()				{ return mRawValue;	}
 

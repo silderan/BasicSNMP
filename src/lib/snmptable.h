@@ -26,6 +26,7 @@
 #include "oid.h"
 #include "snmpencoder.h"
 #include "pduvarbind.h"
+#include "stddeque.h"
 
 #ifdef QT_CORE_LIB
 #include <QString>
@@ -83,24 +84,6 @@ enum StatusRow
 	destroy
 };
 
-const std::map<EntryStatus, StdString> &entryStatusInfoMap();
-StdString entryStatusName(EntryStatus es);
-#ifdef QT_CORE_LIB
-inline QString qEntryStatusName(EntryStatus es)
-{
-	return QString::fromStdString(entryStatusName(es));
-}
-#endif
-
-const std::map<StatusRow, StdString> &statusRowInfoMap();
-StdString statusRowName(StatusRow sr);
-#ifdef QT_CORE_LIB
-inline QString qStatusRowName(StatusRow sr)
-{
-	return QString::fromStdString(statusRowName(sr));
-}
-#endif
-
 struct TableInfo
 {
 	OID keyIndexes;
@@ -121,6 +104,125 @@ struct TableInfo
 			for( Int64 i = baseOID.count()+1; i < varbind.oid().count(); ++i )
 				keyIndexes.push_back( varbind.oid()[i] );
 		}
+	}
+};
+
+// This two classes below are for known column sized tables.
+// It's much more easy to code and use this ones.
+
+// TableRow class stores information of one specific row.
+// One row include the keys and regular columns data.
+// The count of keys and columns must be known before creating it.
+// Derived classes must provide such data.
+class TableRow
+{
+	StdVector<ASN1::Variable> mColumns;
+	OID mKeys;
+
+public:
+	TableRow(Int64 columnCount, Int64 keyCount);
+	bool setColumn(Int64 colIndex, const ASN1::Variable &asn1Var);
+	bool setKey(Int64 keyIndex, const OIDValue &oidValue);
+
+	template <typename T>
+	const ASN1::Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
+	const ASN1::Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
+
+	template <typename T>
+	ASN1::Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
+	ASN1::Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
+
+	const OIDValue &key(Int64 i)const 		{ return mKeys[i];	}
+	OIDValue &key(Int64 i)					{ return mKeys[i];	}
+
+	bool matchKey(const OID &oid) const
+	{
+		return oid.endsWith(mKeys);
+	}
+};
+
+/* T in this class must be a subclass of SNMP::TableRow
+   But, One derived constructor must require exactly 2 parameters because it's spected like that in addCell funcion.
+   Derived class must itself initializate SNMP::TableRow with both column and key count.
+   Like that:
+   class DerivedRow : public SNMP::TableRow
+   {
+   public:
+		DerivedRow(int colCount, int keyCount)
+			: SNMP::TableRow(colCount, keyCount)
+			{	}
+   }
+*/
+template <class T>
+class Table : public StdDeque<T>
+{
+	OID mBaseOID;
+	Int64 mKeyCount;
+	Int64 mColCount;
+	Int64 mStatusColumnIndex;
+
+public:
+	Table(const OID &baseOID,
+		  Int64 keyCount,
+		  Int64 colCount,
+		  Int64 statusColumnIndex = -1)
+		: mBaseOID(baseOID)
+		, mKeyCount(keyCount)
+		, mColCount(colCount)
+		, mStatusColumnIndex(statusColumnIndex)
+	{
+	}
+	Int64 statusColumnIndex() const		{ return mStatusColumnIndex;	}
+	Int64 keyCount() const				{ return mKeyCount;				}
+	Int64 columnCount() const			{ return mColCount;				}
+
+	// Beware. Never call this functions if statusColumnIndex is not set properly.
+	const ASN1::Variable &statusCell(Int64 col) const	{ return columnCell(col, statusColumnIndex());	}
+	ASN1::Variable &statusCell(Int64 col)				{ return columnCell(col, statusColumnIndex());	}
+
+	const ASN1::Variable &columnCell(Int64 row, Int64 col) const	{ return Table::operator[](row).column(col);	}
+	ASN1::Variable &columnCell(Int64 row, Int64 col)				{ return Table::operator[](row).column(col);	}
+
+	const ASN1::Variable &keyCell(Int64 row, Int64 key) const	{ return Table::operator[](row).key(key);	}
+	ASN1::Variable &keyCell(Int64 row, Int64 key)				{ return Table::operator[](row).key(key);	}
+
+	const OID &baseOID() const	{ return mBaseOID;	}
+	int indexOf(const OID &keyOID) const
+	{
+		for( int i = 0; i < Table::count(); ++i )
+		{
+			if( Table::operator[](i).matchKey(keyOID) )
+				return i;
+		}
+		return -1;
+	}
+	void addCell(const SNMP::PDUVarbind &pduVarbind)
+	{
+		OID oid = pduVarbind.oid();
+		int i = indexOf(oid);
+		if( i == -1 )
+		{
+			i = Table::count();
+			// Add a row.
+			Table::append( T(mKeyCount, mColCount) );
+			// set keys.
+			for( int k = 0; k < keyCount(); ++k )
+			{
+				OIDValue keyOID = oid.at(columnCount()+1+k);
+				Table::operator[](i).setKey(k, keyOID);
+			}
+		}
+		OIDValue columnOID = oid.at( columnCount() );
+		Table::operator[](i).setColumn( columnOID.toULongLong()-1, pduVarbind );
+	}
+	void addCells(const SNMP::PDUVarbindList &pduVarbindList)
+	{
+		for( const SNMP::PDUVarbind &var : pduVarbindList )
+			addCell(var);
+	}
+	void addCells(const SNMP::Encoder &snmp)
+	{
+		addCells(snmp.varbindList());
 	}
 };
 

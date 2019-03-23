@@ -8,7 +8,7 @@ QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = BasicSNMP
+TARGET = BasicSNMPGUI
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -25,38 +25,37 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-	main.cpp \
-	mainwindow.cpp \
-	QIniFile.cpp \
-    lib/snmptable.cpp \
-    lib/asn1variable.cpp \
-    lib/asn1encoder.cpp \
-    lib/snmpencoder.cpp \
-    snmptests.cpp \
-	qsnmpconn.cpp \
-    qconstantsstrings.cpp
+		lib/snmptable.cpp \
+		lib/asn1encoder.cpp \
+		lib/snmpencoder.cpp \
+		snmptests.cpp \
+		qsnmpconn.cpp \
+		qconstantsstrings.cpp \
+		QIniFile.cpp \
+		mainwindow.cpp \
+		main.cpp
 
 HEADERS += \
-	mainwindow.h \
-	lib/snmplib.h \
-	lib/asn1types.h \
-	lib/snmptable.h \
-	lib/stdcharvector.h \
-	lib/stdlist.h \
-	lib/oid.h \
-	lib/asn1variable.h \
-	lib/stdvector.h \
-	lib/pduvarbind.h \
-	lib/asn1encoder.h \
-	lib/snmpencoder.h \
-    QIniFile.h \
-	utils.h \
-    snmptests.h \
-	qsnmpconn.h \
-    qconstantsstrings.h \
-    lib/types.h \
-    lib/stdstring.h \
-    lib/basic_types.h
+		lib/snmplib.h \
+		lib/asn1types.h \
+		lib/snmptable.h \
+		lib/stdcharvector.h \
+		lib/stdlist.h \
+		lib/oid.h \
+		lib/asn1variable.h \
+		lib/stdvector.h \
+		lib/pduvarbind.h \
+		lib/asn1encoder.h \
+		lib/snmpencoder.h \
+		lib/types.h \
+		lib/stdstring.h \
+		lib/basic_types.h \
+		qsnmpconn.h \
+		utils.h \
+		snmptests.h \
+		qconstantsstrings.h \
+		QIniFile.h \
+		mainwindow.h
 
 FORMS += \
         mainwindow.ui
