@@ -9,7 +9,7 @@ The main goal for this project is to include this library in any simple program 
 
 All the protocol encoding/decoding is written in standard c++11.
 But the GUI API testing, communication and "UnitTests" classes/funcions are based on the fantastic Qt5 framework.
-If you look at the examples below you'll see some non-standard classes like StdString or StdByteVector. All this are subclass of the standards std::xxx basic classes. So, you can static_cast<>() to this base clases without any problem.
+If you look at the examples below you'll see some non-standard classes like StdString or StdByteVector. All this are subclass of the standards std::xxx basic classes. So, you can static_cast<>() to their base clases without any problem.
 The only exceptions are the ones like StdxxxxList that could be StdList or StdDeque. Maybe I'll change it in future revisions.
 
 That means that if anyone likes to use this library into their non-qt project, can use all files that are in the /src/lib/ folder. Anyone can include code directly. There is no need to search for precompiled libraries for specific compiler-platform.
@@ -37,7 +37,7 @@ This could be the more important information you must know in order to use this 
 Remember that the base library (the one in the /src/lib/ folder) does not include any network feature. You must code your own or use the QBasicSNMPCommLibrary. But this needs the Qt framework to compile.
 
 ## Examples.
-### Simplest code
+### Simplest code: GetRequest and GetNextRequest
 The simplest code I can imagine is to encode a GetRequest or GetNextRequest datagram.
 ```
 #include "lib/snmplib.h"
@@ -52,6 +52,7 @@ void main()
 }
 ```
 
+### Simpe code: decode data
 Next step is to send ```bytes``` through any UDP socket to the agent and wait for the reply.
 Then you can do something like that:
 ```
@@ -108,4 +109,35 @@ void onDataReceived(const StdByteVector bytes)
   }
 }
 ```
+
+### Simple code: SetRequest
+Setting request is also simple.
+There are two convenient funcions to encode SetRequest:
+```
+void Encoder::setupSetRequest(int version, const StdString &comunity, int requestID, const PDUVarbindList &varbindList);
+void Encoder::setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1Variable &asn1Var);
+```
+The second one is just an overload of the first one for the most use of this feature.
+See the code:
+```
+StdByteVector setRemoteOctetString( const SNMP::OID &oid, const StdString &str)
+{
+    SNMP::Encoder snmp;
+    // 1 is the Version
+    // "private" is the comunity. Usually for setting values must be private and not public.
+    // 2 is the requestID. Will be reported back to identify the request.
+    // oid... must is the EXACT oid
+    // str is the name to set.
+    snmp.setupSetRequest(1, "private", 2, oid, str);
+    return snmp.encodeRequest();
+}
+void main()
+{
+    StdByteVector bytes = setRemoteOctetString( SNMP::OID("1.3.1.1.1.1.1", "HelloSNMP" );
+    // now, send bytes to the UDP socket.
+}
+```
+You'll wait for the agent responce to the SetRequest.
+In my experience, agents reports an error or the data they set remotely. Meaning, reports back the same as you send exept the requestType (requestType is the "command" part of the request, we'll see in next section.
+
 Will continue...
