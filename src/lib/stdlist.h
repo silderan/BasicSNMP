@@ -24,6 +24,7 @@
 #define STDLIST_H
 
 #include <list>
+namespace SNMP {
 
 template <typename T>
 class StdList : public std::list<T>
@@ -51,4 +52,5 @@ public:
 	bool isEmpty()			{ return count() == 0;	}
 };
 
+}
 #endif // STDLIST_H

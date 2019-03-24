@@ -31,13 +31,14 @@
 #include "lib/stdvector.h"
 #include "lib/stdstring.h"
 
-namespace Utils
-{
+namespace SNMP {
+namespace Utils {
+
 	class IPv4Address
 	{
 		union
 		{
-			UInt32 ipNumber;
+			SNMP::UInt32 ipNumber;
 			struct
 			{
 				Byte octetD;
@@ -175,7 +176,9 @@ namespace Utils
 			return it->second;
 		return def;
 	}
-}
+
+};	// namespace Utils
+};	// namespace SNMP
 
 
 #endif // UTILS_H

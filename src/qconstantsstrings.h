@@ -31,23 +31,23 @@
 
 namespace SNMPConstants {
 
-const QMap<ASN1::DataType,QString> &asn1TypeMap();
-QString asn1TypeName(ASN1::DataType type);
+const QMap<SNMP::ASN1DataType,QString> &asn1TypeMap();
+QString asn1TypeName(SNMP::ASN1DataType type);
 
-QString asn1PrintableValue(const ASN1::Variable &asn1Var);
+QString asn1PrintableValue(const SNMP::ASN1Variable &asn1Var);
 
 template <typename V>
 QString printableRawData(const V &v)
 {
-	return QString::fromStdString(Utils::printableBytes(v, " "));
+	return QString::fromStdString(SNMP::Utils::printableBytes(v, " "));
 }
 
 inline QString printableRawData(const SNMP::PDUVarbind &varbind)
 {
-	return QString::fromStdString(Utils::printableBytes(varbind.rawValue(), " "));
+	return QString::fromStdString(SNMP::Utils::printableBytes(varbind.rawValue(), " "));
 }
 
-QString printableErrorCode(ASN1::Encoder::ErrorCode ec);
+QString printableErrorCode(SNMP::ASN1Encoder::ErrorCode ec);
 QString printableErrorCode(const SNMP::Encoder &snmp);
 
 const QMap<SNMP::EntryStatus, QString> &entryStatusInfoMap();

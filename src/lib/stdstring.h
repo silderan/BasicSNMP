@@ -23,7 +23,10 @@
 #define STDSTRING_H
 
 #include <string>
+namespace SNMP {
 
 typedef std::string StdString;
+
+}
 
 #endif // STDSTRING_H

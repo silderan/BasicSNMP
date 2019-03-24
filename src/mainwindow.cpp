@@ -28,9 +28,11 @@
 
 #include <QStyledItemDelegate>
 
-const QList<ASN1::DataType> &MainWindow::asn1Types()
+using namespace SNMP;
+
+const QList<ASN1DataType> &MainWindow::asn1Types()
 {
-	static QList<ASN1::DataType> setRequestTypes = QList<ASN1::DataType>() << ASN1TYPE_INTEGER
+	static QList<ASN1DataType> setRequestTypes = QList<ASN1DataType>() << ASN1TYPE_INTEGER
 															   << ASN1TYPE_BOOLEAN
 															   << ASN1TYPE_BITSTRING
 															   << ASN1TYPE_OCTETSTRING
@@ -46,10 +48,10 @@ const QList<ASN1::DataType> &MainWindow::asn1Types()
 
 class QStatusColumnComboBoxDelegate : public QStyledItemDelegate
 {
-	std::function<SNMP::SMIVersion()> mGetSMIVer;
+	std::function<SMIVersion()> mGetSMIVer;
 
 public:
-	QStatusColumnComboBoxDelegate(std::function<SNMP::SMIVersion()> getSMIVer)
+	QStatusColumnComboBoxDelegate(std::function<SMIVersion()> getSMIVer)
 		: mGetSMIVer(getSMIVer)
 	{
 
@@ -61,10 +63,10 @@ public:
 
 		switch( mGetSMIVer() )
 		{
-		case SNMP::SMIVersion::SMIv1:
+		case SMIVersion::SMIv1:
 		{
 			QComboBox *cb = new QComboBox(parent);
-			QMapIterator<SNMP::EntryStatus, QString> it(SNMPConstants::entryStatusInfoMap());
+			QMapIterator<EntryStatus, QString> it(SNMPConstants::entryStatusInfoMap());
 			while( it.hasNext() )
 			{
 				it.next();
@@ -73,10 +75,10 @@ public:
 
 			return cb;
 		}
-		case SNMP::SMIVersion::SMIv2:
+		case SMIVersion::SMIv2:
 		{
 			QComboBox *cb = new QComboBox(parent);
-			QMapIterator<SNMP::StatusRow, QString> it(SNMPConstants::statusRowInfoMap());
+			QMapIterator<StatusRow, QString> it(SNMPConstants::statusRowInfoMap());
 			while( it.hasNext() )
 			{
 				it.next();
@@ -188,18 +190,18 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-ASN1::DataType MainWindow::currentValueType(QComboBox *cb) const
+ASN1DataType MainWindow::currentValueType(QComboBox *cb) const
 {
 	return valueType(cb, cb->currentIndex());
 }
 
-ASN1::DataType MainWindow::valueType(QComboBox *cb, int index) const
+ASN1DataType MainWindow::valueType(QComboBox *cb, int index) const
 {
 	int value = cb->itemData(index, Qt::UserRole).value<int>();
-	return static_cast<ASN1::DataType>(value);
+	return static_cast<ASN1DataType>(value);
 }
 
-void MainWindow::selectValueType(QComboBox *cb, ASN1::DataType valueType)
+void MainWindow::selectValueType(QComboBox *cb, ASN1DataType valueType)
 {
 	for( int i = 0; i < cb->count(); ++i )
 		if( this->valueType(cb, i) == valueType )
@@ -209,9 +211,9 @@ void MainWindow::selectValueType(QComboBox *cb, ASN1::DataType valueType)
 		}
 }
 
-void MainWindow::setupValueTypeComboBox(QComboBox *cb, ASN1::DataType selected)
+void MainWindow::setupValueTypeComboBox(QComboBox *cb, ASN1DataType selected)
 {
-	for( ASN1::DataType dataType : asn1Types() )
+	for( ASN1DataType dataType : asn1Types() )
 	{
 		int value = static_cast<int>(dataType);
 		cb->addItem( SNMPConstants::asn1TypeName(dataType), value );
@@ -236,7 +238,7 @@ void MainWindow::addReplyRow(const OID &oid, const QString &valueType, const QSt
 	item->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
 }
 
-void MainWindow::addReplyRow(const SNMP::PDUVarbind &varbind)
+void MainWindow::addReplyRow(const PDUVarbind &varbind)
 {
 	addReplyRow( varbind.oid(),
 				 SNMPConstants::asn1TypeName(varbind.type()),
@@ -244,7 +246,7 @@ void MainWindow::addReplyRow(const SNMP::PDUVarbind &varbind)
 				 SNMPConstants::printableRawData(varbind) );
 }
 
-void MainWindow::onSNMPDataReceived(const SNMP::Encoder &snmp)
+void MainWindow::onSNMPDataReceived(const Encoder &snmp)
 {
 	ui->replyTable->setRowCount(0);
 
@@ -252,7 +254,7 @@ void MainWindow::onSNMPDataReceived(const SNMP::Encoder &snmp)
 		ui->statusBar->showMessage( tr("Ningun dato recibido. Error: %1").arg(SNMPConstants::printableErrorCode(snmp)) );
 	else
 	{
-		for( const SNMP::PDUVarbind &varbind : snmp.varbindList() )
+		for( const PDUVarbind &varbind : snmp.varbindList() )
 			addReplyRow( varbind );
 		ui->statusBar->showMessage( SNMPConstants::printableErrorCode(snmp) );
 	}
@@ -275,7 +277,7 @@ void MainWindow::on_sendGetNextRequest_clicked()
 
 void MainWindow::on_sendSetRequest_clicked()
 {
-	ASN1::Variable asn1Var;
+	ASN1Variable asn1Var;
 	switch( ui->valueType->currentData().toInt() )
 	{
 	case ASN1TYPE_BOOLEAN:
@@ -289,7 +291,7 @@ void MainWindow::on_sendSetRequest_clicked()
 		break;
 	default:
 		ui->statusBar->showMessage( tr("Envio de datos tipo %1 no implementado aun")
-									.arg( SNMPConstants::asn1TypeName( static_cast<ASN1::DataType>(ui->valueType->currentData().toInt()))) );
+									.arg( SNMPConstants::asn1TypeName( static_cast<ASN1DataType>(ui->valueType->currentData().toInt()))) );
 		return;
 	}
 	snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
@@ -428,9 +430,9 @@ void MainWindow::setupSNMPTableTab()
 	ui->keyCount->setValue( mTableColumnInfoList.keyColumnCount() );
 	ui->columnCount->setValue( mTableColumnInfoList.count() - ui->keyCount->value() );
 
-	ui->smiVersion->addItem( "SMIv1 (EntryStatus)", static_cast<int>(SNMP::SMIVersion::SMIv1) );
-	ui->smiVersion->addItem( "SMIv2 (RowStatus)", static_cast<int>(SNMP::SMIVersion::SMIv2) );
-	ui->smiVersion->setCurrentIndex( mSMIVersion - SNMP::SMIVersion::SMIv1 );
+	ui->smiVersion->addItem( "SMIv1 (EntryStatus)", static_cast<int>(SMIVersion::SMIv1) );
+	ui->smiVersion->addItem( "SMIv2 (RowStatus)", static_cast<int>(SMIVersion::SMIv2) );
+	ui->smiVersion->setCurrentIndex( mSMIVersion - SMIVersion::SMIv1 );
 
 	updateHeaderLabel( -1 );
 	updateLocalIndexComboBox();
@@ -478,17 +480,17 @@ void MainWindow::onRowsChanged(int rows)
 
 void MainWindow::onSMIVersionChanged(int index)
 {
-	switch( mSMIVersion = static_cast<SNMP::SMIVersion>( ui->smiVersion->itemData(index).toInt()) )
+	switch( mSMIVersion = static_cast<SMIVersion>( ui->smiVersion->itemData(index).toInt()) )
 	{
-	case SNMP::SMIVersion::SMIUnd:
+	case SMIVersion::SMIUnd:
 		ui->statusColumn->setEnabled(false);
 		ui->statusColumnLabel->setText( tr("Choose SMIVersion") );
 		break;
-	case SNMP::SMIVersion::SMIv1:
+	case SMIVersion::SMIv1:
 		ui->statusColumn->setEnabled(true);
 		ui->statusColumnLabel->setText( tr("Column for EntryStatus") );
 		break;
-	case SNMP::SMIVersion::SMIv2:
+	case SMIVersion::SMIv2:
 		ui->statusColumn->setEnabled(true);
 		ui->statusColumnLabel->setText( tr("Column for StatusRow") );
 		break;
@@ -521,11 +523,12 @@ void MainWindow::on_getTable_clicked()
 	}
 }
 
+#define TABLE_REQUEST_ID	10000
 void MainWindow::on_discoverTable_clicked()
 {
-	if( snmpConn.isDiscoveringTable() )
+	if( snmpConn.isDiscoveringTable(TABLE_REQUEST_ID) )
 	{
-		snmpConn.cancelDiscoverTable();
+		snmpConn.cancelDiscoverTable(TABLE_REQUEST_ID);
 		onTableReceived(-1);
 	}
 	else
@@ -540,7 +543,7 @@ void MainWindow::on_discoverTable_clicked()
 		ui->columnCount->setValue(1);
 		ui->statusColumn->setCurrentIndex(0);
 		snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
-		snmpConn.discoverTable( ui->version->currentData(Qt::UserRole).toInt(), ui->oidBase->text(), ui->comunity->currentText(), ++mRequestID );
+		snmpConn.discoverTable( ui->version->currentData(Qt::UserRole).toInt(), ui->oidBase->text(), ui->comunity->currentText(), TABLE_REQUEST_ID );
 	}
 }
 
@@ -585,11 +588,11 @@ void MainWindow::updateStatusColumnValues(int col)
 			int statusRow = ui->snmpTable->item(row, col)->data(Qt::UserRole).toString().toInt();
 			switch( mSMIVersion )
 			{
-			case SNMP::SMIVersion::SMIv1:
-				ui->snmpTable->item(row, col)->setText( SNMPConstants::entryStatusName( static_cast<SNMP::EntryStatus>(statusRow)) );
+			case SMIVersion::SMIv1:
+				ui->snmpTable->item(row, col)->setText( SNMPConstants::entryStatusName( static_cast<EntryStatus>(statusRow)) );
 				break;
-			case SNMP::SMIVersion::SMIv2:
-				ui->snmpTable->item(row, col)->setText( SNMPConstants::statusRowName( static_cast<SNMP::StatusRow>(statusRow)) );
+			case SMIVersion::SMIv2:
+				ui->snmpTable->item(row, col)->setText( SNMPConstants::statusRowName( static_cast<StatusRow>(statusRow)) );
 				break;
 			default:
 				ui->snmpTable->item(row, col)->setText( "Choose SMIVersion" );
@@ -604,10 +607,10 @@ void MainWindow::updateStatusColumnValues(int col)
 	}
 }
 
-void MainWindow::onTableCellReceived(const SNMP::Encoder &snmp)
+void MainWindow::onTableCellReceived(const Encoder &snmp)
 {
 	ui->statusBar->showMessage( SNMPConstants::printableErrorCode(snmp) );
-	SNMP::TableInfo tableInfo(snmpConn.tableBaseOID(), snmp);
+	TableInfo tableInfo(snmpConn.tableBaseOID(TABLE_REQUEST_ID), snmp);
 
 	if( tableInfo.keyIndexes.count() != ui->keyCount->value() )
 	{
@@ -691,7 +694,7 @@ void MainWindow::on_sendTable_clicked()
 		}
 		++col;
 	}
-	SNMP::Encoder snmp;
+	Encoder snmp;
 	snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
 	snmp.setVersion( ui->version->currentData(Qt::UserRole).toInt() );
 	snmp.setComunity( ui->comunity->currentText().toStdString() );
@@ -721,7 +724,7 @@ void MainWindow::on_sendTable_clicked()
 			break;
 		if( statusColumnIndex != -1 )
 		{
-			ASN1::Variable var;
+			ASN1Variable var;
 			switch( mTableColumnInfoList[statusColumnIndex].valueType )
 			{
 			case ASN1TYPE_INTEGER:
@@ -738,7 +741,7 @@ void MainWindow::on_sendTable_clicked()
 		{
 			if( !mTableColumnInfoList.isReadOnlycolumn(col) && (col != statusColumnIndex) )
 			{
-				ASN1::Variable var;
+				ASN1Variable var;
 				switch( mTableColumnInfoList[col].valueType )
 				{
 				case ASN1TYPE_INTEGER:
@@ -751,7 +754,7 @@ void MainWindow::on_sendTable_clicked()
 					Q_ASSERT(false);
 				}
 				snmp.addCellPDUVar( oidBase, keys, static_cast<OIDValue>(col), var);
-				snmp.setRequestID( ++mRequestID );
+				snmp.setRequestID( TABLE_REQUEST_ID + 1 );
 			}
 			++col;
 		}

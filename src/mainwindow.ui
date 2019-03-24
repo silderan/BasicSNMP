@@ -461,7 +461,10 @@
         <item row="2" column="8">
          <widget class="QSpinBox" name="keyCount">
           <property name="minimum">
-           <number>1</number>
+           <number>0</number>
+          </property>
+          <property name="value">
+           <number>0</number>
           </property>
          </widget>
         </item>
@@ -485,7 +488,10 @@
         <item row="3" column="8">
          <widget class="QSpinBox" name="columnCount">
           <property name="minimum">
-           <number>1</number>
+           <number>0</number>
+          </property>
+          <property name="value">
+           <number>0</number>
           </property>
          </widget>
         </item>
@@ -518,7 +524,7 @@
      <x>0</x>
      <y>0</y>
      <width>1080</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

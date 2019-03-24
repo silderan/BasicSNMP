@@ -28,20 +28,20 @@
 #include "asn1variable.h"
 namespace SNMP {
 
-class PDUVarbind : public ASN1::Variable
+class PDUVarbind : public ASN1Variable
 {
 	OID mOID;
 	StdByteVector mRawValue;
 
 public:
-	PDUVarbind( const OID &oid = "", const ASN1::Variable &asn1Var = ASN1::Variable() )
-		: ASN1::Variable(asn1Var)
+	PDUVarbind( const OID &oid = "", const SNMP::ASN1Variable &asn1Var = SNMP::ASN1Variable() )
+		: SNMP::ASN1Variable(asn1Var)
 		, mOID(oid)
 	{
 
 	}
 	PDUVarbind( const PDUVarbind &varbind )
-		: ASN1::Variable(varbind)
+		: SNMP::ASN1Variable(varbind)
 		, mOID(varbind.mOID)
 		, mRawValue(varbind.mRawValue)
 	{
@@ -49,7 +49,7 @@ public:
 	}
 	void clear()
 	{
-		ASN1::Variable::clear();
+		SNMP::ASN1Variable::clear();
 		mRawValue.clear();
 	}
 	const StdByteVector &rawValue()const	{ return mRawValue;	}

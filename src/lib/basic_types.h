@@ -22,6 +22,8 @@
 #ifndef BASIC_SNMP_BASIC_TYPES_H
 #define BASIC_SNMP_BASIC_TYPES_H
 
+namespace SNMP {
+
 typedef char Int8;
 typedef short Int16;
 typedef int	Int32;
@@ -32,5 +34,7 @@ typedef Byte UInt8;
 typedef unsigned short UInt16;
 typedef unsigned int UInt32;
 typedef unsigned long long UInt64;
+
+} // namespace SNMP
 
 #endif // BASIC_SNMP_BASIC_TYPES_H

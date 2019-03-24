@@ -33,12 +33,12 @@ namespace SNMP {
 
 class Encoder
 {
-	int mVersion;
+	Int32 mVersion;
 	StdString mComunity;
 	int mRequestID;
-	ASN1::Encoder::ErrorCode mErrorCode;
+	ASN1Encoder::ErrorCode mErrorCode;
 	int mErrorObjectIndex;
-	ASN1::DataType mRequestType;
+	ASN1DataType mRequestType;
 	PDUVarbindList mVarbindList;
 
 public:
@@ -56,32 +56,32 @@ public:
 	int requestID() const		{ return mRequestID;	}
 	void setRequestID(int r)	{ mRequestID = r;		}
 
-	ASN1::Encoder::ErrorCode errorCode() const		{ return mErrorCode;	}
-	void setErrorCode(ASN1::Encoder::ErrorCode c)	{ mErrorCode = c;		}
+	ASN1Encoder::ErrorCode errorCode() const		{ return mErrorCode;	}
+	void setErrorCode(ASN1Encoder::ErrorCode c)	{ mErrorCode = c;		}
 
 	int errorObjectIndex() const		{ return mErrorObjectIndex;	}
 	void setErrorObjectIndex(int i)		{ mErrorObjectIndex = i;	}
 
-	ASN1::DataType requestType() const				{ return mRequestType;			}
-	void setRequestType(ASN1::DataType requestType)	{ mRequestType = requestType;	}
+	ASN1DataType requestType() const				{ return mRequestType;			}
+	void setRequestType(ASN1DataType requestType)	{ mRequestType = requestType;	}
 
 	void addPDUVar(const PDUVarbind &pduVarbind);
-	void addCellPDUVar(OID oidBase, const OID &keyValues, OIDValue oidColumn, const ASN1::Variable &asn1Var);
+	void addCellPDUVar(OID oidBase, const OID &keyValues, OIDValue oidColumn, const ASN1Variable &asn1Var);
 
 	const PDUVarbindList &varbindList()	const	{ return mVarbindList;	}
 	void setObjectIdentifier(const OID &oid)	{ addPDUVar(oid);	}
 
-	void setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const PDUVarbindList &varbindList);
-	void setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const OIDList &oidList);
+	void setupRequest(int version, const StdString &comunity, int requestID, ASN1DataType requestCode, const PDUVarbindList &varbindList);
+	void setupRequest(int version, const StdString &comunity, int requestID, ASN1DataType requestCode, const OIDList &oidList);
 	void setupGetRequest(int version, const StdString &comunity, int requestID, const OID &oid);
 	void setupGetRequest(int version, const StdString &comunity, int requestID, const OIDList &oidList);
 	void setupGetNextRequest(int version, const StdString &comunity, int requestID, const OID &oid);
 	void setupGetNextRequest(int version, const StdString &comunity, int requestID, const OIDList &oidList);
 
 	void setupSetRequest(int version, const StdString &comunity, int requestID, const PDUVarbindList &varbindList);
-	void setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1::Variable &asn1Var);
+	void setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1Variable &asn1Var);
 
-	void setError(ASN1::Encoder::ErrorCode code, int index)	{ mErrorCode = code; mErrorObjectIndex = index;}
+	void setError(ASN1Encoder::ErrorCode code, int index)	{ mErrorCode = code; mErrorObjectIndex = index;}
 
 	bool decodeAll(const StdByteVector &ba, bool includeRawData);
 	StdByteVector encodeRequest() const;

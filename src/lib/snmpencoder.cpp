@@ -22,12 +22,12 @@
 
 #include "snmpencoder.h"
 
-namespace SNMP {
+using namespace SNMP;
 
 Encoder::Encoder()
 	: mVersion(0)
 	, mRequestID(0)
-	, mErrorCode(ASN1::Encoder::ErrorCode::NoError)
+	, mErrorCode(ASN1Encoder::ErrorCode::NoError)
 	, mErrorObjectIndex(0)
 	, mRequestType(0)
 {
@@ -38,7 +38,7 @@ void Encoder::addPDUVar(const PDUVarbind &pduVarbind)
 	mVarbindList.append(pduVarbind);
 }
 
-void Encoder::addCellPDUVar(OID oidBase, const OID &keyValues, OIDValue oidColumn, const ASN1::Variable &asn1Var )
+void Encoder::addCellPDUVar(OID oidBase, const OID &keyValues, OIDValue oidColumn, const ASN1Variable &asn1Var )
 {
 	oidBase.push_back(oidColumn);
 	for( auto k : keyValues )
@@ -46,25 +46,25 @@ void Encoder::addCellPDUVar(OID oidBase, const OID &keyValues, OIDValue oidColum
 	addPDUVar( PDUVarbind(oidBase, asn1Var) );
 }
 
-void Encoder::setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const PDUVarbindList &varbindList)
+void Encoder::setupRequest(int version, const StdString &comunity, int requestID, ASN1DataType requestCode, const PDUVarbindList &varbindList)
 {
 	assert( (requestCode == ASN1TYPE_GetRequestPDU) || (requestCode == ASN1TYPE_GetNextRequestPDU) || (requestCode == ASN1TYPE_SetRequestPDU));
 
 	mVersion = version;
 	mComunity = comunity;
 	mRequestID = requestID;
-	mErrorCode = ASN1::Encoder::ErrorCode::NoError;
+	mErrorCode = ASN1Encoder::ErrorCode::NoError;
 	mErrorObjectIndex = 0;
 	mRequestType = requestCode;
 	mVarbindList = varbindList;
 }
 
-void Encoder::setupRequest(int version, const StdString &comunity, int requestID, ASN1::DataType requestCode, const OIDList &oidList)
+void Encoder::setupRequest(int version, const StdString &comunity, int requestID, ASN1DataType requestCode, const OIDList &oidList)
 {
 	mVarbindList.clear();
 
 	for( const OID &oid : oidList )
-		mVarbindList.append( PDUVarbind(oid, ASN1::Variable()) );
+		mVarbindList.append( PDUVarbind(oid, ASN1Variable()) );
 
 	return setupRequest( version, comunity, requestID, requestCode, mVarbindList );
 }
@@ -94,50 +94,50 @@ void Encoder::setupSetRequest(int version, const StdString &comunity, int reques
 	return setupRequest(version, comunity, requestID, ASN1TYPE_SetRequestPDU, varbindList);
 }
 
-void Encoder::setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1::Variable &asn1Var)
+void Encoder::setupSetRequest(int version, const StdString &comunity, int requestID, const OID &oid, const ASN1Variable &asn1Var)
 {
 	return setupSetRequest(version, comunity, requestID, PDUVarbindList() << PDUVarbind(oid, asn1Var) );
 }
 
 bool Encoder::decodeAll(const StdByteVector &ba, bool includeRawData)
 {
-	ASN1::Variable asn1Var;
+	ASN1Variable asn1Var;
 	Int64 pos = 0;
 	Int64 length;
 
-	mErrorCode = ASN1::Encoder::ErrorCode::NoError;
+	mErrorCode = ASN1Encoder::ErrorCode::NoError;
 	mErrorObjectIndex = 0;
-	if( !ASN1::Encoder::decodeSequence(mErrorCode, ba, pos, length) )
+	if( !ASN1Encoder::decodeSequence(mErrorCode, ba, pos, length) )
 		return false;
-	if( !ASN1::Encoder::decodeInteger(mErrorCode, mVersion, ba, pos, true) )
+	if( !ASN1Encoder::decodeInteger(mErrorCode, mVersion, ba, pos, true) )
 		return false;
 
 	// Comunity.
 	StdByteVector comunity;
-	if( !ASN1::Encoder::decodeOctetString(mErrorCode, comunity, ba, pos) )
+	if( !ASN1Encoder::decodeOctetString(mErrorCode, comunity, ba, pos) )
 		return false;
 	setComunity(comunity);
 
-	if( !ASN1::Encoder::decodePDURequest(mErrorCode, ba, pos) )
+	if( !ASN1Encoder::decodePDURequest(mErrorCode, ba, pos) )
 		return false;
 
 	// Request ID.
-	if( !ASN1::Encoder::decodeInteger(mErrorCode, mRequestID, ba, pos, true) )
+	if( !ASN1Encoder::decodeInteger(mErrorCode, mRequestID, ba, pos, true) )
 		return false;
 
 	// Error code.
 	int errorCode;
 	// TODO: Shall splitout decoding error code and remote error code?
-	if( !ASN1::Encoder::decodeInteger(mErrorCode, errorCode, ba, pos, false) )
+	if( !ASN1Encoder::decodeInteger(mErrorCode, errorCode, ba, pos, false) )
 		return false;
-	mErrorCode = static_cast<ASN1::Encoder::ErrorCode>(errorCode);
+	mErrorCode = static_cast<ASN1Encoder::ErrorCode>(errorCode);
 
 	// Error index.
-	if( !ASN1::Encoder::decodeInteger(mErrorCode, mErrorObjectIndex, ba, pos, false) )
+	if( !ASN1Encoder::decodeInteger(mErrorCode, mErrorObjectIndex, ba, pos, false) )
 		return false;
 
 	Int64 varbindListLength;
-	if( !ASN1::Encoder::decodeSequence(mErrorCode, ba, pos, varbindListLength) )
+	if( !ASN1Encoder::decodeSequence(mErrorCode, ba, pos, varbindListLength) )
 		return false;
 
 	// And the variable list.
@@ -146,18 +146,18 @@ bool Encoder::decodeAll(const StdByteVector &ba, bool includeRawData)
 	while( pos < ba.count() )
 	{
 		Int64 varbindLength;
-		if( !ASN1::Encoder::decodeSequence(mErrorCode, ba, pos, varbindLength) )
+		if( !ASN1Encoder::decodeSequence(mErrorCode, ba, pos, varbindLength) )
 			return false;
-		if( !ASN1::Encoder::decodeObjectIdentifier(mErrorCode, pduVar.oid(), ba, pos) )
+		if( !ASN1Encoder::decodeObjectIdentifier(mErrorCode, pduVar.oid(), ba, pos) )
 			return false;
-		if( !ASN1::Encoder::decodeUnknown(mErrorCode, ba, pos, pduVar, includeRawData ? &pduVar.rawValue() : nullptr) )
+		if( !ASN1Encoder::decodeUnknown(mErrorCode, ba, pos, pduVar, includeRawData ? &pduVar.rawValue() : nullptr) )
 			return false;
 		mVarbindList.append(pduVar);
 	}
 
 	// Now, pos shall point to the next data.
 
-	return mErrorCode == ASN1::Encoder::ErrorCode::NoError;
+	return mErrorCode == ASN1Encoder::ErrorCode::NoError;
 }
 
 StdByteVector Encoder::encodeRequest() const
@@ -167,19 +167,18 @@ StdByteVector Encoder::encodeRequest() const
 
 	for( const PDUVarbind &varbind : mVarbindList )
 	{
-		varbindEncoded += ASN1::Encoder::encodeSequence(StdByteVectorList()
-													 << ASN1::Encoder::encodeObjectIdentifier(varbind.oid())
-													 << ASN1::Encoder::encodeUnknown(varbind) );
+		varbindEncoded += ASN1Encoder::encodeSequence(StdByteVectorList()
+													 << ASN1Encoder::encodeObjectIdentifier(varbind.oid())
+													 << ASN1Encoder::encodeUnknown(varbind) );
 	}
-	return ASN1::Encoder::encodeSequence( StdByteVectorList()
-										<< ASN1::Encoder::encodeInteger(mVersion, true)
-										<< ASN1::Encoder::encodeOctetString(mComunity)
-										<< ASN1::Encoder::encodeList(mRequestType,
+	return ASN1Encoder::encodeSequence( StdByteVectorList()
+										<< ASN1Encoder::encodeInteger(mVersion, true)
+										<< ASN1Encoder::encodeOctetString(mComunity)
+										<< ASN1Encoder::encodeList(mRequestType,
 																  StdByteVectorList()
-																	<< ASN1::Encoder::encodeInteger(mRequestID, false)	// RequestID
-																	<< ASN1::Encoder::encodeInteger(0, true)	// Error Code
-																	<< ASN1::Encoder::encodeInteger(0, true)	// Error Index
-																	<< ASN1::Encoder::encodeSequence(StdByteVectorList() << varbindEncoded) ) );	// Varbind List
+																	<< ASN1Encoder::encodeInteger(mRequestID, false)	// RequestID
+																	<< ASN1Encoder::encodeInteger(0, true)	// Error Code
+																	<< ASN1Encoder::encodeInteger(0, true)	// Error Index
+																	<< ASN1Encoder::encodeSequence(StdByteVectorList() << varbindEncoded) ) );	// Varbind List
 }
 
-} // namespace SNMP

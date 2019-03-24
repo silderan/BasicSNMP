@@ -25,6 +25,7 @@
 #include <QHostAddress>
 #include <QUdpSocket>
 
+using namespace SNMP;
 SNMPConn::SNMPConn(quint16 agentPort, const QString &agentAddress, bool includeRawData)
 	: mAgentPort(0)
 	, mIncludeRawData(includeRawData)
@@ -46,7 +47,7 @@ void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 	mAgentPort = agentPort;
 }
 
-void SNMPConn::sendRequest(const SNMP::Encoder &snmpDeco)
+void SNMPConn::sendRequest(const Encoder &snmpDeco)
 {
 	StdByteVector data = snmpDeco.encodeRequest();
 
@@ -55,21 +56,21 @@ void SNMPConn::sendRequest(const SNMP::Encoder &snmpDeco)
 
 void SNMPConn::sendGetRequest(int version, const OID &oid, const QString &comunity, int requestID)
 {
-	SNMP::Encoder snmpDeco;
+	Encoder snmpDeco;
 	snmpDeco.setupGetRequest(version, comunity.toStdString(), requestID, oid);
 	sendRequest(snmpDeco);
 }
 
 void SNMPConn::sendGetNextRequest(int version, const OID &oid, const QString &comunity, int requestID)
 {
-	SNMP::Encoder snmpDeco;
+	Encoder snmpDeco;
 	snmpDeco.setupGetNextRequest(version, comunity.toStdString(), requestID, oid);
 	sendRequest(snmpDeco);
 }
 
-void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comunity, const ASN1::Variable &asn1Var, int requestID)
+void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comunity, const ASN1Variable &asn1Var, int requestID)
 {
-	SNMP::Encoder snmpDeco;
+	Encoder snmpDeco;
 	snmpDeco.setupSetRequest(version, comunity.toStdString(), requestID, oid, asn1Var);
 	sendRequest(snmpDeco);
 }
@@ -93,7 +94,7 @@ void SNMPConn::onDataReceived()
 	{
 		StdByteVector datagram( static_cast<Int64>(mAgentSocket.pendingDatagramSize()) );
 		mAgentSocket.readDatagram( datagram.chars(), datagram.count() );
-		SNMP::Encoder snmp;
+		Encoder snmp;
 		snmp.decodeAll(datagram, includeRawData());
 
 		if( !mTableRequestMap.contains(snmp.requestID()) )

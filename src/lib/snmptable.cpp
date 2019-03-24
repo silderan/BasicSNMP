@@ -22,8 +22,7 @@
 
 #include "snmptable.h"
 
-namespace SNMP {
-
+using namespace SNMP;
 
 TableRow::TableRow(Int64 columnCount, Int64 keyCount)
 {
@@ -31,7 +30,7 @@ TableRow::TableRow(Int64 columnCount, Int64 keyCount)
 	mKeys.resize(keyCount);
 }
 
-bool TableRow::setColumn(Int64 colIndex, const ASN1::Variable &asn1Var)
+bool TableRow::setColumn(Int64 colIndex, const ASN1Variable &asn1Var)
 {
 	if( (colIndex >= 0) && (colIndex < mColumns.count()) )
 	{
@@ -51,4 +50,3 @@ bool TableRow::setKey(Int64 keyIndex, const OIDValue &oidValue)
 	return false;
 }
 
-} // namespace SNMP

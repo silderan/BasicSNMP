@@ -26,6 +26,8 @@
 #include <vector>
 #include "basic_types.h"
 
+namespace SNMP {
+
 template<typename T>
 class StdVector : public std::vector<T>
 {
@@ -79,4 +81,5 @@ public:
 	bool isEmpty() const	{ return count() == 0;	}
 };
 
+} // namespace SNMP
 #endif // STDVECTOR_H

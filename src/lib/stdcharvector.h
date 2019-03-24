@@ -30,6 +30,8 @@
 #include "stdstring.h"
 #include "stdvector.h"
 #include "../utils.h"
+namespace SNMP {
+
 
 class StdByteVector : public StdVector<Byte>
 {
@@ -118,5 +120,7 @@ public:
 
 	StdString toStdString() const { return StdString( chars(), size() ); }
 };
+
+} // namespace SNMP
 
 #endif // STDCHARVECTOR_H

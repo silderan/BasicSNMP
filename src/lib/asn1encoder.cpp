@@ -22,9 +22,9 @@
 
 #include "asn1encoder.h"
 
-namespace ASN1 {
+using namespace SNMP;
 
-bool Encoder::checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, ASN1::DataType validType)
+bool ASN1Encoder::checkDataType(ErrorCode &errorCode, ASN1DataType actualType, ASN1DataType validType)
 {
 	if( actualType != validType )
 	{
@@ -34,7 +34,7 @@ bool Encoder::checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, ASN
 	return true;
 }
 
-bool Encoder::checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, const StdVector<ASN1::DataType> &validTypes)
+bool ASN1Encoder::checkDataType(ErrorCode &errorCode, ASN1DataType actualType, const StdVector<ASN1DataType> &validTypes)
 {
 	if( validTypes.size() && !Utils::contains(validTypes, actualType) )
 	{
@@ -44,7 +44,7 @@ bool Encoder::checkDataType(ErrorCode &errorCode, ASN1::DataType actualType, con
 	return true;
 }
 
-bool Encoder::checkDataLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 dataPos, Int64 actualLength, Int64 minLength, Int64 maxLength)
+bool ASN1Encoder::checkDataLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 dataPos, Int64 actualLength, Int64 minLength, Int64 maxLength)
 {
 	if( actualLength < minLength )
 	{
@@ -65,7 +65,7 @@ bool Encoder::checkDataLength(ErrorCode &errorCode, const StdByteVector &ba, Int
 	return false;
 }
 
-bool Encoder::checkDataRoom(ErrorCode &errorCode, const StdByteVector &ba, Int64 initialDataPos, Int64 dataLength)
+bool ASN1Encoder::checkDataRoom(ErrorCode &errorCode, const StdByteVector &ba, Int64 initialDataPos, Int64 dataLength)
 {
 	if( (ba.count() - initialDataPos) < dataLength )
 	{
@@ -75,11 +75,11 @@ bool Encoder::checkDataRoom(ErrorCode &errorCode, const StdByteVector &ba, Int64
 	return true;
 }
 
-bool Encoder::getTLVData(ErrorCode &errorCode,
+bool ASN1Encoder::getTLVData(ErrorCode &errorCode,
 							const StdByteVector &ba,	// Byte Array received from SNMP agent.
 							Int64 &initialPos,			// Initial pos in the array to analize. Will point to data position if no error.
-							const std::vector<ASN1::DataType> &validTypeList,	// Valid data type.
-							ASN1::DataType &actualType,	// Actual data received. Will be set if no error.
+							const std::vector<ASN1DataType> &validTypeList,	// Valid data type.
+							ASN1DataType &actualType,	// Actual data received. Will be set if no error.
 							Int64 &length,				// The length of the data to retrieve. Will be set if no error.
 							Int64 minDataLength,		// The minimim data required. usually, it's 1.
 							Int64 maxDataLength)		// Max data length for data. For example. if a signed 32 integer is spected, data length should be 4. 5 if it's a UInt32eger because of the 00 leading byte needed for this.
@@ -100,10 +100,10 @@ bool Encoder::getTLVData(ErrorCode &errorCode,
 	return checkDataLength(errorCode, ba, initialPos, length, minDataLength, maxDataLength);
 }
 
-bool Encoder::getTLVData(ErrorCode &errorCode,
+bool ASN1Encoder::getTLVData(ErrorCode &errorCode,
 							const StdByteVector &ba,
 							Int64 &initialPos,
-							ASN1::DataType validType,
+							ASN1DataType validType,
 							Int64 &length,
 							Int64 minDataLength,
 							Int64 maxDataLength)
@@ -123,10 +123,10 @@ bool Encoder::getTLVData(ErrorCode &errorCode,
 	return checkDataLength(errorCode, ba, initialPos, length, minDataLength, maxDataLength);
 }
 
-bool Encoder::getTLVData(ErrorCode &errorCode,
+bool ASN1Encoder::getTLVData(ErrorCode &errorCode,
 							const StdByteVector &ba,
 							Int64 &initialPos,
-							ASN1::DataType &validType,
+							ASN1DataType &validType,
 							Int64 &length)
 {
 	if( ba.count() <= initialPos )
@@ -142,7 +142,7 @@ bool Encoder::getTLVData(ErrorCode &errorCode,
 	return checkDataLength(errorCode, ba, initialPos, length, 0, 0xFFFFFFFF);
 }
 
-bool Encoder::getLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length)
+bool ASN1Encoder::getLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length)
 {
 	if( pos < static_cast<UInt32>(ba.size()) )
 	{
@@ -169,7 +169,7 @@ bool Encoder::getLength(ErrorCode &errorCode, const StdByteVector &ba, Int64 &po
 	return false;
 }
 
-void Encoder::setLength(StdByteVector &ba, Int64 pos, Int64 length)
+void ASN1Encoder::setLength(StdByteVector &ba, Int64 pos, Int64 length)
 {
 	// Length has two forms to be encoded.
 	// 1: If value is less than 127, it's encoded directly.
@@ -189,13 +189,13 @@ void Encoder::setLength(StdByteVector &ba, Int64 pos, Int64 length)
 	}
 }
 
-bool Encoder::decodeNULL(ErrorCode &/*errorCode*/, const StdByteVector &/*ba*/, Int64 &/*pos*/, Int64 /*length*/)
+bool ASN1Encoder::decodeNULL(ErrorCode &/*errorCode*/, const StdByteVector &/*ba*/, Int64 &/*pos*/, Int64 /*length*/)
 {
 	return true;
 }
 
-bool Encoder::decodeInteger(ErrorCode &errorCode,
-							   ASN1::Variable &asnVar,
+bool ASN1Encoder::decodeInteger(ErrorCode &errorCode,
+							   ASN1Variable &asnVar,
 							   const StdByteVector &ba,
 							   Int64 &pos,
 							   Int64 length)
@@ -228,7 +228,7 @@ bool Encoder::decodeInteger(ErrorCode &errorCode,
 
 
 
-StdByteVector Encoder::encodeOctetString(const StdByteVector &value)
+StdByteVector ASN1Encoder::encodeOctetString(const StdByteVector &value)
 {
 	StdByteVector ba;
 	ba.append( ASN1TYPE_OCTETSTRING );
@@ -237,7 +237,7 @@ StdByteVector Encoder::encodeOctetString(const StdByteVector &value)
 	return ba;
 }
 
-StdByteVector Encoder::encodeOctetString(const StdString &value)
+StdByteVector ASN1Encoder::encodeOctetString(const StdString &value)
 {
 	StdByteVector ba;
 	ba.append( ASN1TYPE_OCTETSTRING );
@@ -246,7 +246,7 @@ StdByteVector Encoder::encodeOctetString(const StdString &value)
 	return ba;
 }
 
-void Encoder::encodeObjectIdentifierValue(const OIDValue &oidValue, StdByteVector &ba)
+void ASN1Encoder::encodeObjectIdentifierValue(const OIDValue &oidValue, StdByteVector &ba)
 {
 	int bitShift = 63;
 	UInt64 mask = 0x7F00000000000000u;
@@ -260,7 +260,7 @@ void Encoder::encodeObjectIdentifierValue(const OIDValue &oidValue, StdByteVecto
 	}
 	ba.append( static_cast<char>(value & 0x7Fu) );
 }
-bool Encoder::decodeObjectIdentifierValue(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, OIDValue &oidValue)
+bool ASN1Encoder::decodeObjectIdentifierValue(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, OIDValue &oidValue)
 {
 	UInt64 value = 0;
 	do
@@ -278,7 +278,7 @@ bool Encoder::decodeObjectIdentifierValue(ErrorCode &errorCode, const StdByteVec
 	return true;
 }
 
-bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode,
+bool ASN1Encoder::decodeObjectIdentifier(ErrorCode &errorCode,
 										OID &oid,
 										const StdByteVector &ba,
 										Int64 &pos,
@@ -299,7 +299,7 @@ bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode,
 
 	return true;
 }
-StdByteVector Encoder::encodeObjectIdentifier(const OID &oid)
+StdByteVector ASN1Encoder::encodeObjectIdentifier(const OID &oid)
 {
 	StdByteVector ba;
 	assert( oid.count() > 1 );
@@ -318,7 +318,7 @@ StdByteVector Encoder::encodeObjectIdentifier(const OID &oid)
 	return ba;
 }
 
-bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdByteVector &ba, Int64 &pos)
 {
 	Int64 length;
 	if( !getTLVData(errorCode, ba, pos, ASN1TYPE_OBJECTID, length, 1) )
@@ -327,7 +327,7 @@ bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode, OID &oid, const StdBy
 	return decodeObjectIdentifier(errorCode, oid, ba, pos, length);
 }
 
-bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeObjectIdentifier(ErrorCode &errorCode, ASN1Variable &asn1Var, const StdByteVector &ba, Int64 &pos)
 {
 	OID oid;
 	if( decodeObjectIdentifier(errorCode, oid, ba, pos) )
@@ -338,7 +338,7 @@ bool Encoder::decodeObjectIdentifier(ErrorCode &errorCode, ASN1::Variable &asn1V
 	return false;
 }
 
-bool Encoder::decodeGenericString(ErrorCode &/*errorCode*/,
+bool ASN1Encoder::decodeGenericString(ErrorCode &/*errorCode*/,
 									 StdByteVector &value,
 									 const StdByteVector &ba,
 									 Int64 &pos,
@@ -349,12 +349,12 @@ bool Encoder::decodeGenericString(ErrorCode &/*errorCode*/,
 	return true;
 }
 
-bool Encoder::decodeGenericString(ErrorCode &errorCode,
+bool ASN1Encoder::decodeGenericString(ErrorCode &errorCode,
 									 StdByteVector &value,
 									 const StdByteVector &ba,
 									 Int64 &pos)
 {
-	ASN1::DataType dataType;
+	ASN1DataType dataType;
 	Int64 length;
 
 	if( !getTLVData(errorCode, ba, pos, dataType, length) )
@@ -369,12 +369,12 @@ bool Encoder::decodeGenericString(ErrorCode &errorCode,
 	return false;
 }
 
-bool Encoder::decodeOctetString(ErrorCode &errorCode, StdByteVector &value, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeOctetString(ErrorCode &errorCode, StdByteVector &value, const StdByteVector &ba, Int64 &pos)
 {
 	return decodeGenericString(errorCode, value, ba, pos);
 }
 
-bool Encoder::decodeNULL(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeNULL(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos)
 {
 	Int64 length;
 
@@ -384,7 +384,7 @@ bool Encoder::decodeNULL(ErrorCode &errorCode, const StdByteVector &ba, Int64 &p
 	return decodeNULL(errorCode, ba, pos, length);
 }
 
-StdByteVector Encoder::encodeNULL()
+StdByteVector ASN1Encoder::encodeNULL()
 {
 	StdByteVector ba;
 	ba.append( ASN1TYPE_NULL );
@@ -392,7 +392,7 @@ StdByteVector Encoder::encodeNULL()
 	return ba;
 }
 
-bool Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos)
 {
 	Int64 length;
 	if( !getTLVData(errorCode, ba, pos, ASN1TYPE_IPv4Address, length, 4, 4) )
@@ -407,7 +407,7 @@ bool Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, 
 	return true;
 }
 
-bool Encoder::decodeIPv4Address(ErrorCode &errorCode, ASN1::Variable &asn1Var, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodeIPv4Address(ErrorCode &errorCode, ASN1Variable &asn1Var, const StdByteVector &ba, Int64 &pos)
 {
 	Utils::IPv4Address ipv4;
 	if( decodeIPv4Address(errorCode, ipv4, ba, pos) )
@@ -418,7 +418,7 @@ bool Encoder::decodeIPv4Address(ErrorCode &errorCode, ASN1::Variable &asn1Var, c
 	return false;
 }
 
-bool Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos, Int64 length)
+bool ASN1Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, const StdByteVector &ba, Int64 &pos, Int64 length)
 {
 	if( length != 4 )
 	{
@@ -434,7 +434,7 @@ bool Encoder::decodeIPv4Address(ErrorCode &errorCode, Utils::IPv4Address &ipv4, 
 	return true;
 }
 
-StdByteVector Encoder::encodeIPv4Address(const StdString &ipv4Address)
+StdByteVector ASN1Encoder::encodeIPv4Address(const StdString &ipv4Address)
 {
 	StdByteVector ba;
 	ba.append( ASN1TYPE_IPv4Address );
@@ -446,7 +446,7 @@ StdByteVector Encoder::encodeIPv4Address(const StdString &ipv4Address)
 	return ba;
 }
 
-StdByteVector Encoder::encodeIPv4Address(const Utils::IPv4Address &ipv4Address)
+StdByteVector ASN1Encoder::encodeIPv4Address(const Utils::IPv4Address &ipv4Address)
 {
 	StdByteVector ba;
 	ba.append( ASN1TYPE_IPv4Address );
@@ -459,12 +459,12 @@ StdByteVector Encoder::encodeIPv4Address(const Utils::IPv4Address &ipv4Address)
 	return ba;
 }
 
-bool Encoder::decodeUnknown(ErrorCode &errorCode,
+bool ASN1Encoder::decodeUnknown(ErrorCode &errorCode,
 								const StdByteVector &ba,
 								Int64 &pos,
 								Int64 length,
-								ASN1::DataType asn1Type,
-								ASN1::Variable &data )
+								ASN1DataType asn1Type,
+								ASN1Variable &data )
 {
 	bool rtn;
 	switch( asn1Type )
@@ -514,10 +514,10 @@ bool Encoder::decodeUnknown(ErrorCode &errorCode,
 	return rtn;
 }
 
-bool Encoder::decodeUnknown(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, ASN1::Variable &asn1Var, StdByteVector *rawData)
+bool ASN1Encoder::decodeUnknown(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, ASN1Variable &asn1Var, StdByteVector *rawData)
 {
 	Int64 length;
-	ASN1::DataType asn1Type;
+	ASN1DataType asn1Type;
 	if( !getTLVData(errorCode, ba, pos, asn1Type, length) )
 		return false;
 
@@ -527,11 +527,11 @@ bool Encoder::decodeUnknown(ErrorCode &errorCode, const StdByteVector &ba, Int64
 	return decodeUnknown(errorCode, ba, pos, length, asn1Type, asn1Var);
 }
 
-StdByteVector Encoder::encodeUnknown( const ASN1::Variable &pduVariable )
+StdByteVector ASN1Encoder::encodeUnknown( const ASN1Variable &pduVariable )
 {
 	switch( pduVariable.type() )
 	{
-	case ASN1TYPE_NULL:			return encodeNULL();
+	case ASN1TYPE_NULL:			return encodeNULL( );
 	case ASN1TYPE_INTEGER:		return encodeInteger( pduVariable.toInteger(), false );
 	case ASN1TYPE_Gauge:		return encodeInteger( pduVariable.toGauge(), true );
 	case ASN1TYPE_Counter:		return encodeInteger( pduVariable.toCounter(), true );
@@ -548,7 +548,7 @@ StdByteVector Encoder::encodeUnknown( const ASN1::Variable &pduVariable )
 	return encodeNULL();
 }
 
-bool Encoder::decodeComplex(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length, ASN1::DataType &asn1Type, StdByteVectorList &/*baList*/)
+bool ASN1Encoder::decodeComplex(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length, ASN1DataType &asn1Type, StdByteVectorList &/*baList*/)
 {
 	if( !getTLVData(errorCode, ba, pos, asn1Type, length) )
 		return false;
@@ -560,7 +560,7 @@ bool Encoder::decodeComplex(ErrorCode &errorCode, const StdByteVector &ba, Int64
 	return true;
 }
 
-StdByteVector Encoder::encodeList(ASN1::DataType asn1Type, const StdByteVectorList &baList)
+StdByteVector ASN1Encoder::encodeList(ASN1DataType asn1Type, const StdByteVectorList &baList)
 {
 	StdByteVector rtn;
 
@@ -582,7 +582,7 @@ StdByteVector Encoder::encodeList(ASN1::DataType asn1Type, const StdByteVectorLi
 }
 
 // Despite de name, it doesn't decode anything becaus doesn't knows the structure. Just puts "pos" variable on data position.
-bool Encoder::decodeSequence(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length)
+bool ASN1Encoder::decodeSequence(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos, Int64 &length)
 {
 	if( !getTLVData(errorCode, ba, pos, ASN1TYPE_Sequence, length, 0) )
 		return false;
@@ -590,16 +590,16 @@ bool Encoder::decodeSequence(ErrorCode &errorCode, const StdByteVector &ba, Int6
 	return true;
 }
 
-StdByteVector Encoder::encodeSequence(const StdByteVectorList &baList)
+StdByteVector ASN1Encoder::encodeSequence(const StdByteVectorList &baList)
 {
 	return encodeList( ASN1TYPE_Sequence, baList );
 }
 
-bool Encoder::decodePDURequest(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos)
+bool ASN1Encoder::decodePDURequest(ErrorCode &errorCode, const StdByteVector &ba, Int64 &pos)
 {
 	Int64 length;
-	ASN1::DataType dataType;
-	static StdVector<ASN1::DataType> validPDUTypes = {
+	ASN1DataType dataType;
+	static StdVector<ASN1DataType> validPDUTypes = {
 		ASN1TYPE_GetRequestPDU,
 		ASN1TYPE_SetRequestPDU,
 		ASN1TYPE_ResponcePDU
@@ -611,4 +611,3 @@ bool Encoder::decodePDURequest(ErrorCode &errorCode, const StdByteVector &ba, In
 	return true;
 }
 
-} // namespace ASN1

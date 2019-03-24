@@ -32,16 +32,17 @@
 
 #include "qconstantsstrings.h"
 
+using namespace SNMP;
 template<typename T>
 void testOneInteger(T value, const char *typeName, bool isSigned, const char *buff, int buffSize)
 {
 	T newVal;
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1::Encoder::encodeInteger(static_cast<T>(value), isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
+	std::cout << ((ASN1Encoder::encodeInteger(static_cast<T>(value), isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
 
 	Int64 pos = 0;
-	ASN1::Encoder::ErrorCode errorCode;
-	ASN1::Encoder::decodeInteger( errorCode, newVal, ba, pos, isSigned );
+	ASN1Encoder::ErrorCode errorCode;
+	ASN1Encoder::decodeInteger( errorCode, newVal, ba, pos, isSigned );
 	std::cout << ((newVal == value) ? "Ok" : "Fail") << " getInteger<" << typeName << ">("<<value<<") " << newVal << " Error code=" << errorCode << std::endl;
 }
 
@@ -108,12 +109,12 @@ void testIntegers()
 void testOneOctetString(const StdString &value, const char *buff, int buffSize)
 {
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1::Encoder::encodeOctetString(value) == ba) ? "Ok" : "Fail") << " setOctetString("<< value <<") " << std::endl;
+	std::cout << ((ASN1Encoder::encodeOctetString(value) == ba) ? "Ok" : "Fail") << " setOctetString("<< value <<") " << std::endl;
 
 	Int64 pos = 0;
-	ASN1::Encoder::ErrorCode errorCode;
-	ASN1::Variable asn1Var;
-	ASN1::Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
+	ASN1Encoder::ErrorCode errorCode;
+	ASN1Variable asn1Var;
+	ASN1Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
 	std::cout << (asn1Var.toStdString() == value ? "Ok" : "Fail") << " getOctetString() " << " " << asn1Var.toStdString() << " ErrorCode=" << errorCode << std::endl;
 
 	std::cout << std::endl;
@@ -137,12 +138,12 @@ void testOctetStrings()
 void testOneOID(const OID &oid, const char *buff, int buffSize)
 {
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1::Encoder::encodeObjectIdentifier(oid) == ba) ? "Ok" : "Fail") << " encodeObjectIdentifier("<<oid.toStdString()<<") " << std::endl;
+	std::cout << ((ASN1Encoder::encodeObjectIdentifier(oid) == ba) ? "Ok" : "Fail") << " encodeObjectIdentifier("<<oid.toStdString()<<") " << std::endl;
 
 	Int64 pos = 0;
-	ASN1::Encoder::ErrorCode errorCode;
-	ASN1::Variable asn1Var;
-	ASN1::Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
+	ASN1Encoder::ErrorCode errorCode;
+	ASN1Variable asn1Var;
+	ASN1Encoder::decodeUnknown( errorCode, ba, pos, asn1Var, nullptr );
 	std::cout << ((asn1Var.toOID() == oid) ? "Ok" : "Fail") << " decodeObjectIdentifier() " << asn1Var.toOID().toStdString() << " ErrorCode=" << errorCode << std::endl;
 
 	std::cout << std::endl;
@@ -161,11 +162,11 @@ void testOIDs()
 void testOneNULL(const char *buff, int buffSize)
 {
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1::Encoder::encodeNULL() == ba) ? "Ok" : "Fail") << " encodeNULL()" << std::endl;
+	std::cout << ((ASN1Encoder::encodeNULL() == ba) ? "Ok" : "Fail") << " encodeNULL()" << std::endl;
 
 	Int64 pos = 0;
-	ASN1::Encoder::ErrorCode errorCode;
-	std::cout << (ASN1::Encoder::decodeNULL(errorCode, ba, pos) ? "Ok" : "Fail") << " decodeNULL() " << " ErrorCode=" << errorCode << std::endl;
+	ASN1Encoder::ErrorCode errorCode;
+	std::cout << (ASN1Encoder::decodeNULL(errorCode, ba, pos) ? "Ok" : "Fail") << " decodeNULL() " << " ErrorCode=" << errorCode << std::endl;
 
 	std::cout << std::endl;
 }
@@ -181,7 +182,7 @@ void testSNMPRequest()
 	SNMP::Encoder snmpRequest;
 	snmpRequest.setComunity( "private" );
 	snmpRequest.setVersion( 0 );	// SNMPv1
-	snmpRequest.setError( ASN1::Encoder::ErrorCode::NoError, 0 );
+	snmpRequest.setError( ASN1Encoder::ErrorCode::NoError, 0 );
 	snmpRequest.setRequestID( 1 );
 	snmpRequest.setRequestType( ASN1TYPE_GetRequestPDU );
 	snmpRequest.setObjectIdentifier( "1.3.6.1.4.1.2680.1.2.7.3.2.0" );

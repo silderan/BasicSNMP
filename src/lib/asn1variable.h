@@ -29,11 +29,11 @@
 #include "../utils.h"
 #include "oid.h"
 
-namespace ASN1 {
+namespace SNMP {
 
-class Variable
+class ASN1Variable
 {
-	ASN1::DataType mDataType;
+	ASN1DataType mDataType;
 
 	struct Value
 	{
@@ -62,14 +62,14 @@ class Variable
 	} mDataValue;
 
 public:
-	Variable()
+	ASN1Variable()
 		: mDataType(ASN1TYPE_NULL)
 	{
 	}
 
 	static int maxNumberSize()				{ return sizeof(double);	}
-	ASN1::DataType type() const				{ return mDataType;		}
-	void setType(ASN1::DataType asn1Type)	{ mDataType = asn1Type;	}
+	ASN1DataType type() const				{ return mDataType;		}
+	void setType(ASN1DataType asn1Type)	{ mDataType = asn1Type;	}
 
 	void setNull()						{ mDataType = ASN1TYPE_NULL;	}
 
@@ -114,7 +114,7 @@ public:
 
 	StdString toStdString() const					{ return mDataValue.octetString.toStdString(); }
 
-	void setData(ASN1::DataType type, const StdByteVector &ba)	{ mDataType = type; mDataValue.octetString = ba;	}
+	void setData(ASN1DataType type, const StdByteVector &ba)	{ mDataType = type; mDataValue.octetString = ba;	}
 
 	const Utils::IPv4Address &toIPV4() const			{ return mDataValue.ipv4Address;	}
 	void setIPv4(const Utils::IPv4Address &ipv4)		{ mDataValue.ipv4Address = ipv4;	}

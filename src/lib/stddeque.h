@@ -23,8 +23,9 @@
 #define STDDEQUE_H
 
 #include <deque>
-template <typename T>
 
+namespace SNMP {
+template <typename T>
 class StdDeque : public std::deque<T>
 {
 public:
@@ -49,5 +50,5 @@ public:
 
 	bool isEmpty()			{ return count() == 0;	}
 };
-
+}
 #endif // STDDEQUE_H

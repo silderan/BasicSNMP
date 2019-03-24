@@ -32,8 +32,7 @@
 #include <QString>
 #endif
 
-namespace SNMP
-{
+namespace SNMP {
 
 /*
  * A table row in SNMP is coded like that into the OIDs:
@@ -116,21 +115,21 @@ struct TableInfo
 // Derived classes must provide such data.
 class TableRow
 {
-	StdVector<ASN1::Variable> mColumns;
+	StdVector<SNMP::ASN1Variable> mColumns;
 	OID mKeys;
 
 public:
 	TableRow(Int64 columnCount, Int64 keyCount);
-	bool setColumn(Int64 colIndex, const ASN1::Variable &asn1Var);
+	bool setColumn(Int64 colIndex, const SNMP::ASN1Variable &asn1Var);
 	bool setKey(Int64 keyIndex, const OIDValue &oidValue);
 
 	template <typename T>
-	const ASN1::Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
-	const ASN1::Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
+	const SNMP::ASN1Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
+	const SNMP::ASN1Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
 
 	template <typename T>
-	ASN1::Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
-	ASN1::Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
+	SNMP::ASN1Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
+	SNMP::ASN1Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
 
 	const OIDValue &key(Int64 i)const 		{ return mKeys[i];	}
 	OIDValue &key(Int64 i)					{ return mKeys[i];	}
@@ -177,14 +176,14 @@ public:
 	Int64 columnCount() const			{ return mColCount;				}
 
 	// Beware. Never call this functions if statusColumnIndex is not set properly.
-	const ASN1::Variable &statusCell(Int64 col) const	{ return columnCell(col, statusColumnIndex());	}
-	ASN1::Variable &statusCell(Int64 col)				{ return columnCell(col, statusColumnIndex());	}
+	const SNMP::ASN1Variable &statusCell(Int64 col) const	{ return columnCell(col, statusColumnIndex());	}
+	SNMP::ASN1Variable &statusCell(Int64 col)				{ return columnCell(col, statusColumnIndex());	}
 
-	const ASN1::Variable &columnCell(Int64 row, Int64 col) const	{ return Table::operator[](row).column(col);	}
-	ASN1::Variable &columnCell(Int64 row, Int64 col)				{ return Table::operator[](row).column(col);	}
+	const SNMP::ASN1Variable &columnCell(Int64 row, Int64 col) const	{ return Table::operator[](row).column(col);	}
+	SNMP::ASN1Variable &columnCell(Int64 row, Int64 col)				{ return Table::operator[](row).column(col);	}
 
-	const ASN1::Variable &keyCell(Int64 row, Int64 key) const	{ return Table::operator[](row).key(key);	}
-	ASN1::Variable &keyCell(Int64 row, Int64 key)				{ return Table::operator[](row).key(key);	}
+	const SNMP::ASN1Variable &keyCell(Int64 row, Int64 key) const	{ return Table::operator[](row).key(key);	}
+	SNMP::ASN1Variable &keyCell(Int64 row, Int64 key)				{ return Table::operator[](row).key(key);	}
 
 	const OID &baseOID() const	{ return mBaseOID;	}
 	int indexOf(const OID &keyOID) const

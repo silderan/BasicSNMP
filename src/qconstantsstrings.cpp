@@ -25,9 +25,11 @@
 
 namespace SNMPConstants {
 
-const QMap<ASN1::DataType, QString> &asn1TypeMap()
+using namespace SNMP;
+
+const QMap<ASN1DataType, QString> &asn1TypeMap()
 {
-	static QMap<ASN1::DataType, QString> info {
+	static QMap<ASN1DataType, QString> info {
 		{ ASN1TYPE_BOOLEAN,			"Primitive_Boolean" },
 		{ ASN1TYPE_INTEGER,			"Primitive_Integer" },
 		{ ASN1TYPE_BITSTRING,		"Primitive_BitString" },
@@ -77,12 +79,12 @@ const QMap<ASN1::DataType, QString> &asn1TypeMap()
 	return info;
 }
 
-QString asn1TypeName(ASN1::DataType type)
+QString asn1TypeName(ASN1DataType type)
 {
 	return asn1TypeMap().value(type, QString("UnknownASN1Type_%1").arg(type, 2, 16, QChar('0')));
 }
 
-QString asn1PrintableValue(const ASN1::Variable &asn1Var)
+QString asn1PrintableValue(const ASN1Variable &asn1Var)
 {
 	switch( asn1Var.type() )
 	{
@@ -118,37 +120,37 @@ QString asn1PrintableValue(const ASN1::Variable &asn1Var)
 	return QString("<no displayable>");
 }
 
-QString printableErrorCode(ASN1::Encoder::ErrorCode ec)
+QString printableErrorCode(ASN1Encoder::ErrorCode ec)
 {
 	switch( ec )
 	{
-	case ASN1::Encoder::ErrorCode::DatagramInterrupted:	return "DatagramInterrupted";
-	case ASN1::Encoder::ErrorCode::UnsignedMalformed:	return "UnsignedMalformed";
-	case ASN1::Encoder::ErrorCode::NotEnoughRoom:		return "NotEnoughRoom";
-	case ASN1::Encoder::ErrorCode::NoError:				return "NoError";
-	case ASN1::Encoder::ErrorCode::TooBig:				return "TooBig";
-	case ASN1::Encoder::ErrorCode::NoSuchName:			return "NoSuchName";
-	case ASN1::Encoder::ErrorCode::ReadOnly:			return "ReadOnly";
-	case ASN1::Encoder::ErrorCode::BadValue:			return "Bad Value";
-	case ASN1::Encoder::ErrorCode::GenericError:		return "Generic error";
-	case ASN1::Encoder::ErrorCode::NoAccess:			return "No accesible";
-	case ASN1::Encoder::ErrorCode::WrongType:			return "Wrong type";
-	case ASN1::Encoder::ErrorCode::WrongLength:			return "Wrong length";
-	case ASN1::Encoder::ErrorCode::WrongEncoding:		return "Wrong encoding";
-	case ASN1::Encoder::ErrorCode::WrongValue:			return "Wong value";
-	case ASN1::Encoder::ErrorCode::NoCreation:			return "Cannot create";
-	case ASN1::Encoder::ErrorCode::InconsistentValue:	return "Value inconsistent with other object values";
-	case ASN1::Encoder::ErrorCode::ResourceUnavailable:	return "No resources available";
-	case ASN1::Encoder::ErrorCode::CommitFailed:		return "Commit failed; no variables updated";
-	case ASN1::Encoder::ErrorCode::UndoFailed:			return "Some variables were updated because undo was not possible";
-	case ASN1::Encoder::ErrorCode::AuthorizationError:	return "Authorization error";
-	case ASN1::Encoder::ErrorCode::NotWritable:			return "Canot modify object";
-	case ASN1::Encoder::ErrorCode::InconsistentName:	return "InconsistentName: Cannot create new object because its inconsistent with other objects";
+	case ASN1Encoder::ErrorCode::DatagramInterrupted:	return "DatagramInterrupted";
+	case ASN1Encoder::ErrorCode::UnsignedMalformed:	return "UnsignedMalformed";
+	case ASN1Encoder::ErrorCode::NotEnoughRoom:		return "NotEnoughRoom";
+	case ASN1Encoder::ErrorCode::NoError:				return "NoError";
+	case ASN1Encoder::ErrorCode::TooBig:				return "TooBig";
+	case ASN1Encoder::ErrorCode::NoSuchName:			return "NoSuchName";
+	case ASN1Encoder::ErrorCode::ReadOnly:			return "ReadOnly";
+	case ASN1Encoder::ErrorCode::BadValue:			return "Bad Value";
+	case ASN1Encoder::ErrorCode::GenericError:		return "Generic error";
+	case ASN1Encoder::ErrorCode::NoAccess:			return "No accesible";
+	case ASN1Encoder::ErrorCode::WrongType:			return "Wrong type";
+	case ASN1Encoder::ErrorCode::WrongLength:			return "Wrong length";
+	case ASN1Encoder::ErrorCode::WrongEncoding:		return "Wrong encoding";
+	case ASN1Encoder::ErrorCode::WrongValue:			return "Wong value";
+	case ASN1Encoder::ErrorCode::NoCreation:			return "Cannot create";
+	case ASN1Encoder::ErrorCode::InconsistentValue:	return "Value inconsistent with other object values";
+	case ASN1Encoder::ErrorCode::ResourceUnavailable:	return "No resources available";
+	case ASN1Encoder::ErrorCode::CommitFailed:		return "Commit failed; no variables updated";
+	case ASN1Encoder::ErrorCode::UndoFailed:			return "Some variables were updated because undo was not possible";
+	case ASN1Encoder::ErrorCode::AuthorizationError:	return "Authorization error";
+	case ASN1Encoder::ErrorCode::NotWritable:			return "Canot modify object";
+	case ASN1Encoder::ErrorCode::InconsistentName:	return "InconsistentName: Cannot create new object because its inconsistent with other objects";
 	}
 	return QString("Encoder::ErrorCode_Unknown_0x%1").arg(ec, 2, 16, QChar('0') );
 }
 
-QString printableErrorCode(const SNMP::Encoder &snmp)
+QString printableErrorCode(const Encoder &snmp)
 {
 	// TODO: Mirar de añadir algún tipo de campo más adicional donde guardar ciertos
 	// datos del error que dependan del contexto. Por ejemplo, si el error es del tamaño,
@@ -159,38 +161,38 @@ QString printableErrorCode(const SNMP::Encoder &snmp)
 	return printableErrorCode(snmp.errorCode());
 }
 
-const QMap<SNMP::EntryStatus, QString> &entryStatusInfoMap()
+const QMap<EntryStatus, QString> &entryStatusInfoMap()
 {
-	static QMap<SNMP::EntryStatus, QString> infoMap =
+	static QMap<EntryStatus, QString> infoMap =
 	{
-		{SNMP::EntryStatus::valid,			"EntryStatus: valid"},
-		{SNMP::EntryStatus::createRequest,	"EntryStatus: createRequest"},
-		{SNMP::EntryStatus::underCreation,	"EntryStatus: underCreation"},
-		{SNMP::EntryStatus::invalid,		"EntryStatus: invalid"}
+		{EntryStatus::valid,			"EntryStatus: valid"},
+		{EntryStatus::createRequest,	"EntryStatus: createRequest"},
+		{EntryStatus::underCreation,	"EntryStatus: underCreation"},
+		{EntryStatus::invalid,		"EntryStatus: invalid"}
 	};
 	return infoMap;
 }
 
-QString entryStatusName(SNMP::EntryStatus es)
+QString entryStatusName(EntryStatus es)
 {
 	return entryStatusInfoMap().value( es, "EntryStatus: error-code" );
 }
 
-const QMap<SNMP::StatusRow, QString> &statusRowInfoMap()
+const QMap<StatusRow, QString> &statusRowInfoMap()
 {
-	static QMap<SNMP::StatusRow, QString> infoMap =
+	static QMap<StatusRow, QString> infoMap =
 	{
-		{SNMP::StatusRow::active,			"EntryStatus: valid"},
-		{SNMP::StatusRow::notInService,		"EntryStatus: notInService"},
-		{SNMP::StatusRow::notReady,			"EntryStatus: notReady"},
-		{SNMP::StatusRow::createAndGo,		"EntryStatus: createAndGo"},
-		{SNMP::StatusRow::createAndWait,	"EntryStatus: createAndWait"},
-		{SNMP::StatusRow::destroy,			"EntryStatus: destroy"}
+		{StatusRow::active,			"EntryStatus: valid"},
+		{StatusRow::notInService,		"EntryStatus: notInService"},
+		{StatusRow::notReady,			"EntryStatus: notReady"},
+		{StatusRow::createAndGo,		"EntryStatus: createAndGo"},
+		{StatusRow::createAndWait,	"EntryStatus: createAndWait"},
+		{StatusRow::destroy,			"EntryStatus: destroy"}
 	};
 	return infoMap;
 }
 
-QString statusRowName(SNMP::StatusRow sr)
+QString statusRowName(StatusRow sr)
 {
 	return statusRowInfoMap().value( sr, "EntryStatus: error-code" );
 }

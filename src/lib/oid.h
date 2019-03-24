@@ -23,10 +23,10 @@
 #ifndef OID_H
 #define OID_H
 
-#include <string>
-
 #include "../utils.h"
 #include "types.h"
+
+namespace SNMP {
 
 class OIDValue
 {
@@ -123,5 +123,7 @@ public:
 	}
 };
 typedef StdVector<OID> OIDList;
+
+} // namespace SNMP
 
 #endif // OID_H

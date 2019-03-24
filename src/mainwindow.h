@@ -37,11 +37,11 @@ namespace Ui
 
 struct TableColumnInfo
 {
-	ASN1::DataType valueType;
+	SNMP::ASN1DataType valueType;
 	bool readOnly;
 	QString name;
 
-	TableColumnInfo(ASN1::DataType valueType = ASN1TYPE_NULL, bool readOnly = true, const QString &name = "")
+	TableColumnInfo(SNMP::ASN1DataType valueType = ASN1TYPE_NULL, bool readOnly = true, const QString &name = "")
 		: valueType(valueType)
 		, readOnly(readOnly)
 		, name(name)
@@ -67,7 +67,7 @@ struct TableColumnInfo
 				if( bits.count() != 4 )
 					return;
 				name = bits[1];
-				valueType = static_cast<ASN1::DataType>(bits[2].toInt());
+				valueType = static_cast<SNMP::ASN1DataType>(bits[2].toInt());
 				readOnly = bits[3] == "readOnly";
 				break;
 			}
@@ -217,8 +217,8 @@ public:
 	bool trapEnabled() const					{ return mIniData["snmpAPITester.TrapEnabled"] == "yes";			}
 	void setTrapEnabled(bool enabled)			{ mIniData["snmpAPITester.TrapEnabled"] = enabled ? "yes" : "no";	}
 
-	ASN1::DataType valueType() const			{ return static_cast<ASN1::DataType>(mIniData["snmpAPITester.valueType"].toInt());		}
-	void setValueType(ASN1::DataType valueType)	{ mIniData["snmpAPITester.valueType"] = QString::number(static_cast<int>(valueType));	}
+	SNMP::ASN1DataType valueType() const			{ return static_cast<SNMP::ASN1DataType>(mIniData["snmpAPITester.valueType"].toInt());		}
+	void setValueType(SNMP::ASN1DataType valueType)	{ mIniData["snmpAPITester.valueType"] = QString::number(static_cast<int>(valueType));	}
 
 	QString userName() const					{ return mIniData["snmpAPITester.userName"];		}
 	void setUserName(const QString &userName)	{ mIniData["snmpAPITester.userName"] = userName;	}
@@ -261,20 +261,20 @@ class MainWindow : public QMainWindow
 	TableColumnInfoList mTableColumnInfoList;
 	SNMP::SMIVersion mSMIVersion;
 
-	ASN1::DataType currentValueType(QComboBox *cb)const;
-	ASN1::DataType valueType(QComboBox *cb, int index)const;
-	void selectValueType(QComboBox *cb, ASN1::DataType valueType);
-	void setupValueTypeComboBox(QComboBox *cb, ASN1::DataType selected);
-	static const QList<ASN1::DataType> &asn1Types();
+	SNMP::ASN1DataType currentValueType(QComboBox *cb)const;
+	SNMP::ASN1DataType valueType(QComboBox *cb, int index)const;
+	void selectValueType(QComboBox *cb, SNMP::ASN1DataType valueType);
+	void setupValueTypeComboBox(QComboBox *cb, SNMP::ASN1DataType selected);
+	static const QList<SNMP::ASN1DataType> &asn1Types();
 	void updateHeaderLabel(int col);
 	void updateLocalIndexComboBox();
-	void addReplyRow(const OID &oid, const QString &valueType, const QString &value, const QString &rawValue);
+	void addReplyRow(const SNMP::OID &oid, const QString &valueType, const QString &value, const QString &rawValue);
 	void addReplyRow(const SNMP::PDUVarbind &varbind );
 
 //	void addSNMPTableColumn(int widgetColumn, ASN1Type colType, bool readOnly, const QString colName);
 	void setupSNMPTableTab();
 
-	int matchKey(OID keys);
+	int matchKey(SNMP::OID keys);
 	void updateStatusColumnValues(int col);
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
