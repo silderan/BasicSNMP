@@ -5,17 +5,19 @@ This is a library for basic SNMPv1 and SNMPv2c protocol for a manager (not the a
 Sadly, this won't include any MIB parsing.
 Anyway, the advantages using a MIB are not many in a library like this one, because this library is not for a universal NMS program able to control many unrelated agents. This is for a program to control a specific snmp-agent.
 
-The main goal for this project is to include this library in any simple program that needs to talk to specific agents, but you must know the OIDs and the type of the values to send/get.
+The main goal for this project is to create a easy-to-use code for:
+1. Include this library code directly in any project.
+2. Compile it with your prefered C++ compiler and use the library.
 
-All the protocol encoding/decoding is written in standard c++11.
+For this two reasons, all the protocol encoding/decoding code is written in standard c++11. There are no dependencies for the basic lib.
 But the GUI API testing, communication and "UnitTests" classes/funcions are based on the fantastic Qt5 framework.
 If you look at the examples below you'll see some non-standard classes like StdString or StdByteVector. All this are subclass of the standards std::xxx basic classes. So, you can static_cast<>() to their base clases without any problem.
 The only exceptions are the ones like StdxxxxList that could be StdList or StdDeque. Maybe I'll change it in future revisions.
 
-That means that if anyone likes to use this library into their non-qt project, can use all files that are in the /src/lib/ folder. Anyone can include code directly. There is no need to search for precompiled libraries for specific compiler-platform.
+That means that if anyone likes to use this library into their non-qt project, only need to copy all files that are in the /src/lib/ folder. Anyone can include code directly. There is no need to search for precompiled libraries for specific compiler-platform.
 
 Obviously, you can compile it easily with your prefered compiler to create your own suitable libraries.
-For example, the project QBasicSNMPCommLibrary is a Qt5 project that creates a .a static library for include in any Qt5 project.
+For example, the project QBasicSNMPCommLibrary is a Qt5 project that creates a static library.
 
 ## General view
 Regardless the way you like to use this library, the header you want to include in your code is lib/snmplib.h
@@ -140,4 +142,10 @@ void main()
 You'll wait for the agent responce to the SetRequest.
 In my experience, agents reports an error or the data they set remotely. Meaning, reports back the same as you send exept the requestType (requestType is the "command" part of the request, we'll see in next section.
 
-Will continue...
+### Not simple code: SNMP Conceptual tables.
+Tables in SNMP are not intuitive at all. Maybe, in time, I'll make a document about them in wiki.
+Anyway, this library tries to abstract the developer for this SNMP tables to present them more similar to the standard DDBB tables.
+For this purpose, there are two clases: ```SNMP::TableRow``` and the abstract ```SNMP::Table```
+Basically, you must subclass both (the subclassing obligates you to setup the table), put them together and call the ```void SNMP::Table::addCell(const SNMP::PDUVarbind &pduVarbind)``` funcion every time a GetResponce request comes from the agent.
+Not complicated at all. Actually, it's done in the QBasicSNMPCommLibrary project. Take a look.
+I think it's better to write a manual in the WiKi, some day...
