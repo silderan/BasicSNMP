@@ -9,6 +9,8 @@ The main goal for this project is to include this library in any simple program 
 
 All the protocol encoding/decoding is written in standard c++11.
 But the GUI API testing, communication and "UnitTests" classes/funcions are based on the fantastic Qt5 framework.
+If you look at the examples below you'll see some non-standard classes like StdString or StdByteVector. All this are subclass of the standards std::xxx basic classes. So, you can static_cast<>() to this base clases without any problem.
+The only exceptions are the ones like StdxxxxList that could be StdList or StdDeque. Maybe I'll change it in future revisions.
 
 That means that if anyone likes to use this library into their non-qt project, can use all files that are in the /src/lib/ folder. Anyone can include code directly. There is no need to search for precompiled libraries for specific compiler-platform.
 
@@ -40,16 +42,17 @@ The simplest code I can imagine is to encode a GetRequest or GetNextRequest data
 ```
 #include "lib/snmplib.h"
 
+// void Encoder::setupGetRequest(int version, const StdString &comunity, int requestID, const OID &oid)
 void main()
 {
   SNMP::Encoder snmp;
-  snmp.setupGetRequest(1, "public", 2);
-  // or snmp.setupGetNextRequest(1, "public", 2);
+  snmp.setupGetNextRequest( 1, "public", 2, SNMP::OID("1.3.1.1.") );
+  // or snmp.setupGetRequest( 1, "public", 2, SNMP::OID("....") ); if you know the exact OID to request.
   StdByteVector bytes = snmp.encodeRequest();
 }
 ```
 
-Next step is to send it throu any UDP socket to the agent and wait for the reply.
+Next step is to send ```bytes``` through any UDP socket to the agent and wait for the reply.
 Then you can do something like that:
 ```
 void onDataReceived(const StdByteVector bytes)
@@ -64,7 +67,7 @@ void onDataReceived(const StdByteVector bytes)
       switch( asn1Varbind.type() )
       {
       case ASN1TYPE_NULL:
-        std::cout << "<null" << std::endl;
+        std::cout << "<null>" << std::endl;
         break;
       case ASN1TYPE_OCTETSTRING:
       case ASN1TYPE_IA5String:
@@ -82,11 +85,27 @@ void onDataReceived(const StdByteVector bytes)
         std::cout << "Number " << asn1Varbind.toUnsigned64() << std::endl;
         break;
       default:
-        std::cout << "Unkown type: " << Utils::printableByte(asn1Varbind.type())
-              << "Raw data: " << Utils::printableBytes(asn1Varbind.rawValue()) << std::endl;
+        std::cout << "Unkown type: " << SNMP::Utils::printableByte(asn1Varbind.type())
+              << "Raw data: " << SNMP::Utils::printableBytes(asn1Varbind.rawValue()) << std::endl;
       }
     }
   }
 }
 ```
-Well, that's enough for now. Later I'll continue.
+As you can see, the only "verbose" code is the one you'll need to print the variable data.
+Usually, you just need to check if incoming data is what you need and use it.
+And, also usually and the easiest is that you ask for one data at time because of the limit at 1500bytes per UDP datagram.
+```
+void onDataReceived(const StdByteVector bytes)
+{
+  SNMP::Encoder snmp;
+  if( !snmp.decodeAll(bytes, true) )    // second parameter 'true' to keep raw data. Usefull for debugging.
+    std::cerr << "Error " << snmp.errorCode() << " in object " << snmp.errorObjectIndex() << std::endl;
+  else
+  {
+    if( snmp.varbindList().first().type() == ASN1TYPE_OCTETSTRING )
+        std::cout << snmp.varbindList().first()->toStdString() << std::endl;    // Remember to use toStdString and no toOctetString.
+  }
+}
+```
+Will continue...
