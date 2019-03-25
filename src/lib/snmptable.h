@@ -87,7 +87,7 @@ struct TableInfo
 {
 	OID keyIndexes;
 	UInt64 column;
-	SNMP::PDUVarbind varbind;
+	PDUVarbind varbind;
 
 	TableInfo(const OID &baseOID, const Encoder &snmp)
 	{
@@ -111,25 +111,27 @@ struct TableInfo
 
 // TableRow class stores information of one specific row.
 // One row include the keys and regular columns data.
-// The count of keys and columns must be known before creating it.
-// Derived classes must provide such data.
+// The count of keys and columns must be known before using it.
+// Table class inmediatly resizes the keys and column vectors just after it's been created.
 class TableRow
 {
-	StdVector<SNMP::ASN1Variable> mColumns;
+	StdVector<ASN1Variable> mColumns;
 	OID mKeys;
 
 public:
-	TableRow(Int64 columnCount, Int64 keyCount);
-	bool setColumn(Int64 colIndex, const SNMP::ASN1Variable &asn1Var);
+	void resizeKeys(Int64 keyCount)	{ mKeys.resize(keyCount);		}
+	void resizeCols(Int64 colCount)	{ mColumns.resize(colCount);	}
+
+	bool setColumn(Int64 colIndex, const ASN1Variable &asn1Var);
 	bool setKey(Int64 keyIndex, const OIDValue &oidValue);
 
 	template <typename T>
-	const SNMP::ASN1Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
-	const SNMP::ASN1Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
+	const ASN1Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
+	const ASN1Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
 
 	template <typename T>
-	SNMP::ASN1Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
-	SNMP::ASN1Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
+	ASN1Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
+	ASN1Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
 
 	const OIDValue &key(Int64 i)const 		{ return mKeys[i];	}
 	OIDValue &key(Int64 i)					{ return mKeys[i];	}
@@ -140,20 +142,7 @@ public:
 	}
 };
 
-/* T in this class must be a subclass of SNMP::TableRow
-   But, One derived constructor must require exactly 2 parameters because it's spected like that in addCell funcion.
-   Derived class must itself initializate SNMP::TableRow with both column and key count.
-   Like that:
-   class DerivedRow : public SNMP::TableRow
-   {
-   public:
-		DerivedRow(int colCount, int keyCount)
-			: SNMP::TableRow(colCount, keyCount)
-			{	}
-   }
-*/
-template <class T>
-class Table : public StdDeque<T>
+class Table : public StdDeque<TableRow>
 {
 	OID mBaseOID;
 	Int64 mKeyCount;
@@ -176,52 +165,65 @@ public:
 	Int64 columnCount() const			{ return mColCount;				}
 
 	// Beware. Never call this functions if statusColumnIndex is not set properly.
-	const SNMP::ASN1Variable &statusCell(Int64 col) const	{ return columnCell(col, statusColumnIndex());	}
-	SNMP::ASN1Variable &statusCell(Int64 col)				{ return columnCell(col, statusColumnIndex());	}
+	const ASN1Variable &statusCell(Int64 col) const	{ return columnCell(col, statusColumnIndex());	}
+	ASN1Variable &statusCell(Int64 col)				{ return columnCell(col, statusColumnIndex());	}
 
-	const SNMP::ASN1Variable &columnCell(Int64 row, Int64 col) const	{ return Table::operator[](row).column(col);	}
-	SNMP::ASN1Variable &columnCell(Int64 row, Int64 col)				{ return Table::operator[](row).column(col);	}
+	const ASN1Variable &columnCell(Int64 row, Int64 col) const	{ return rowAt(row).column(col);		}
+	ASN1Variable &columnCell(Int64 row, Int64 col)				{ return rowAt(row).column(col);		}
+	void setColumnCell(Int64 row, Int64 col, const ASN1Variable & var)	{ rowAt(row).column(col) = var;	}
 
-	const SNMP::ASN1Variable &keyCell(Int64 row, Int64 key) const	{ return Table::operator[](row).key(key);	}
-	SNMP::ASN1Variable &keyCell(Int64 row, Int64 key)				{ return Table::operator[](row).key(key);	}
+	const OIDValue &keyCell(Int64 row, Int64 key) const		{ return rowAt(row).key(key);	}
+	OIDValue &keyCell(Int64 row, Int64 key)					{ return rowAt(row).key(key);	}
+	void setKeyCell(Int64 row, Int64 key, const OIDValue &val)	{ keyCell(row, key) = val;	}
 
 	const OID &baseOID() const	{ return mBaseOID;	}
-	int indexOf(const OID &keyOID) const
+	Int64 indexOf(const OID &keyOID) const
 	{
-		for( int i = 0; i < Table::count(); ++i )
+		for( Int64 i = 0; i < Table::count(); ++i )
 		{
-			if( Table::operator[](i).matchKey(keyOID) )
+			if( rowAt(i).matchKey(keyOID) )
 				return i;
 		}
 		return -1;
 	}
-	void addCell(const SNMP::PDUVarbind &pduVarbind)
+	int rowCount() const		{ return Table::count();		}
+
+	const TableRow &firstRow() const		{ return Table::first();		}
+	TableRow &firstRow()					{ return Table::first();		}
+
+	const TableRow &lastRow() const			{ return Table::last();			}
+	TableRow &lastRow()						{ return Table::last();			}
+
+	const TableRow &rowAt(Int64 i) const	{ return Table::operator[](static_cast<UInt64>(i));	}
+	TableRow &rowAt(Int64 i)				{ return Table::operator[](static_cast<UInt64>(i));	}
+
+	void addCell(const PDUVarbind &pduVarbind)
 	{
 		OID oid = pduVarbind.oid();
 		if( oid.startsWith(baseOID()) )
 		{
-			int i = indexOf(oid);
+			Int64 i = indexOf(oid);
 			if( i == -1 )
 			{
 				i = Table::count();
 				// Add a row.
-				Table::append( T(mKeyCount, mColCount) );
+				append( TableRow() );
+				lastRow().resizeKeys(keyCount());
+				lastRow().resizeCols(columnCount());
 				// set keys.
 				for( int k = 0; k < keyCount(); ++k )
-				{
-					Table::operator[](i).setKey( k, oid.at(columnCount()+1+k) );
-				}
+					lastRow().setKey( k, oid.at(columnCount()+1+k) );
 			}
 			// Set column data.
-			Table::operator[](i).setColumn( oid.at(columnCount()).toULongLong()-1, pduVarbind );
+			rowAt(i).setColumn( static_cast<Int64>(oid.at(columnCount()).toULongLong()-1), pduVarbind );
 		}
 	}
-	void addCells(const SNMP::PDUVarbindList &pduVarbindList)
+	void addCells(const PDUVarbindList &pduVarbindList)
 	{
-		for( const SNMP::PDUVarbind &var : pduVarbindList )
+		for( const PDUVarbind &var : pduVarbindList )
 			addCell(var);
 	}
-	void addCells(const SNMP::Encoder &snmp)
+	void addCells(const Encoder &snmp)
 	{
 		addCells(snmp.varbindList());
 	}

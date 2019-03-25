@@ -24,12 +24,6 @@
 
 using namespace SNMP;
 
-TableRow::TableRow(Int64 columnCount, Int64 keyCount)
-{
-	mColumns.resize(columnCount);
-	mKeys.resize(keyCount);
-}
-
 bool TableRow::setColumn(Int64 colIndex, const ASN1Variable &asn1Var)
 {
 	if( (colIndex >= 0) && (colIndex < mColumns.count()) )
