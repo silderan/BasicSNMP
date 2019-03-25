@@ -127,11 +127,11 @@ public:
 
 	template <typename T>
 	const ASN1Variable &column(T i) const					{ return mColumns.at(static_cast<Int64>(i));	}
-	const ASN1Variable &column(const OIDValue oid) const	{ return column(oid.toULongLong());	}
+	const ASN1Variable &column(const OIDValue &oid) const	{ return column(oid.toULongLong());	}
 
 	template <typename T>
 	ASN1Variable &column(T i)					{ return mColumns[static_cast<int>(i)];	}
-	ASN1Variable &column(const OIDValue oid)	{ return column(oid.toULongLong());		}
+	ASN1Variable &column(const OIDValue &oid)	{ return column(oid.toULongLong());		}
 
 	const OIDValue &key(Int64 i)const 		{ return mKeys[i];	}
 	OIDValue &key(Int64 i)					{ return mKeys[i];	}
@@ -176,7 +176,10 @@ public:
 	OIDValue &keyCell(Int64 row, Int64 key)					{ return rowAt(row).key(key);	}
 	void setKeyCell(Int64 row, Int64 key, const OIDValue &val)	{ keyCell(row, key) = val;	}
 
-	const OID &baseOID() const	{ return mBaseOID;	}
+
+	const OID &baseOID() const		{ return mBaseOID;	}
+	Int64 oidColumnIndex(const OID &oid) const	{ return static_cast<Int64>(oid.at(mBaseOID.count()).toULongLong()-1);	}
+
 	Int64 indexOf(const OID &keyOID) const
 	{
 		for( Int64 i = 0; i < Table::count(); ++i )
@@ -197,35 +200,36 @@ public:
 	const TableRow &rowAt(Int64 i) const	{ return Table::operator[](static_cast<UInt64>(i));	}
 	TableRow &rowAt(Int64 i)				{ return Table::operator[](static_cast<UInt64>(i));	}
 
-	void addCell(const PDUVarbind &pduVarbind)
+	std::pair<Int64, Int64> cellIndexes(const OID &cellOID)
+	{
+		return { indexOf(cellOID), (cellOID.count() > columnCount()) ? static_cast<Int64>(cellOID.at(columnCount()).toULongLong()) : -1 };
+	}
+	std::pair<Int64, Int64> cellIndexes(const PDUVarbind &pduVarbind)
+	{
+		return cellIndexes(pduVarbind.oid());
+	}
+	bool addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
 	{
 		OID oid = pduVarbind.oid();
 		if( oid.startsWith(baseOID()) )
 		{
-			Int64 i = indexOf(oid);
-			if( i == -1 )
+			row = indexOf(oid);
+			if( row == -1 )
 			{
-				i = Table::count();
+				row = Table::count();
 				// Add a row.
 				append( TableRow() );
 				lastRow().resizeKeys(keyCount());
 				lastRow().resizeCols(columnCount());
 				// set keys.
 				for( int k = 0; k < keyCount(); ++k )
-					lastRow().setKey( k, oid.at(columnCount()+1+k) );
+					lastRow().setKey( k, oid.at(mBaseOID.count()+k+1) );
 			}
 			// Set column data.
-			rowAt(i).setColumn( static_cast<Int64>(oid.at(columnCount()).toULongLong()-1), pduVarbind );
+			rowAt(row).setColumn( col = oidColumnIndex(oid), pduVarbind );
+			return true;
 		}
-	}
-	void addCells(const PDUVarbindList &pduVarbindList)
-	{
-		for( const PDUVarbind &var : pduVarbindList )
-			addCell(var);
-	}
-	void addCells(const Encoder &snmp)
-	{
-		addCells(snmp.varbindList());
+		return false;
 	}
 };
 
