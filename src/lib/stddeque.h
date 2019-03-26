@@ -38,21 +38,21 @@ public:
 	StdDeque &operator+=(const StdDeque<T> t)		{ return append(t);	}
 	void append(const T &t)
 	{
-		StdDeque<T>::push_back(t);
+		std::deque<T>::push_back(t);
 	}
 	StdDeque &operator+=(const T &other)	{ append(other); return *this; 	}
 	StdDeque &operator<<(const T &other)	{ append(other); return *this;	}
 
-	Int64 count()const		{ return static_cast<int>(StdDeque<T>::size());	}
+	Int64 count()const		{ return static_cast<int>(std::deque<T>::size());	}
 
-	const T &at(Int64 i) const	{ return StdDeque<T>::at(i);	}
-	T &at(Int64 i)				{ return StdDeque<T>::at(i);	}
+	const T &at(Int64 i) const	{ return std::deque<T>::at(i);	}
+	T &at(Int64 i)				{ return std::deque<T>::at(i);	}
 
-	const T &first() const	{ return StdDeque<T>::front();	}
-	T &first()				{ return StdDeque<T>::front();	}
+	const T &first() const	{ return std::deque<T>::front();	}
+	T &first()				{ return std::deque<T>::front();	}
 
-	const T &last() const	{ return StdDeque<T>::back();	}
-	T &last()				{ return StdDeque<T>::back();	}
+	const T &last() const	{ return std::deque<T>::back();	}
+	T &last()				{ return std::deque<T>::back();	}
 
 	bool isEmpty()			{ return count() == 0;	}
 };
