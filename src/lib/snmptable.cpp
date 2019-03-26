@@ -24,23 +24,44 @@
 
 using namespace SNMP;
 
-bool TableRow::setColumn(Int64 colIndex, const ASN1Variable &asn1Var)
+StdDeque<ASN1Variable> Table::keys(Int64 row) const
 {
-	if( (colIndex >= 0) && (colIndex < mColumns.count()) )
+	StdDeque<ASN1Variable> rtn;
+	for( int k = 0; k < keyCount(); ++k )
+		rtn.append( keyValue(row, k) );
+	return rtn;
+}
+
+Int64 Table::rowOf(const OID &cellOID) const
+{
+	for( Int64 row = 0; row < Table::count(); ++row )
 	{
-		column(colIndex) = asn1Var;
+		for( Int64 k = 0; k < keyCount(); ++ k )
+			if( rowAt(row).at(k).toUnsigned64() == cellOID.at(oidKeyIndex(k)).toULongLong() )
+				return row;
+	}
+	return -1;
+}
+
+bool Table::addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
+{
+	OID oid = pduVarbind.oid();
+	if( oid.startsWith(baseOID()) )
+	{
+		row = rowOf(oid);
+		if( row == -1 )
+		{
+			row = Table::count();
+			// Add a row.
+			append( TableRow() );
+			lastRow().resize( columnCount() );
+			// set keys.
+			for( Int64 k = 0; k < keyCount(); ++k )
+				lastRow().setCell(k, oid.at(oidKeyIndex(k)));
+		}
+		// Set column data.
+		rowAt(row).setCell( col = oidColumnIndex(oid), pduVarbind );
 		return true;
 	}
 	return false;
 }
-
-bool TableRow::setKey(Int64 keyIndex, const OIDValue &oidValue)
-{
-	if( (keyIndex >= 0) && (keyIndex < mKeys.count()) )
-	{
-		key(keyIndex) = oidValue;
-		return true;
-	}
-	return false;
-}
-

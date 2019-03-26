@@ -24,6 +24,8 @@
 
 #include <deque>
 
+#include "basic_types.h"
+
 namespace SNMP {
 template <typename T>
 class StdDeque : public std::deque<T>
@@ -40,7 +42,11 @@ public:
 	}
 	StdDeque &operator+=(const T &other)	{ append(other); return *this; 	}
 	StdDeque &operator<<(const T &other)	{ append(other); return *this;	}
-	int count()const	{ return static_cast<int>(StdDeque<T>::size());	}
+
+	Int64 count()const		{ return static_cast<int>(StdDeque<T>::size());	}
+
+	const T &at(Int64 i) const	{ return StdDeque<T>::at(i);	}
+	T &at(Int64 i)				{ return StdDeque<T>::at(i);	}
 
 	const T &first() const	{ return StdDeque<T>::front();	}
 	T &first()				{ return StdDeque<T>::front();	}

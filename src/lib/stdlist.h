@@ -24,6 +24,11 @@
 #define STDLIST_H
 
 #include <list>
+
+#include "basic_types.h"
+
+// This class doesn't have at() or operator[]() because it's a
+// linked list and such functions will be costly. Use StdDeque if need such functions.
 namespace SNMP {
 
 template <typename T>
@@ -41,7 +46,7 @@ public:
 	}
 	StdList &operator+=(const T &other)	{ append(other); return *this; 	}
 	StdList &operator<<(const T &other)	{ append(other); return *this;	}
-	int count()const	{ return static_cast<int>(std::list<T>::size());	}
+	Int64 count()const	{ return static_cast<Int64>(std::list<T>::size());	}
 
 	const T &first() const	{ return std::list<T>::front();	}
 	T &first()				{ return std::list<T>::front();	}
