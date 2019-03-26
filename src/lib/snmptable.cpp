@@ -60,7 +60,12 @@ bool Table::addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
 				lastRow().setCell(k, oid.at(oidKeyIndex(k)));
 		}
 		// Set column data.
-		rowAt(row).setCell( col = oidColumnIndex(oid), pduVarbind );
+		// This col index is 1-based.
+		// Also, actual column index is moved by the keys
+		// So, if the columnIndex == 2 and there are 4 keys.
+		// the correct column must be 2-1+4 = 5
+		col = columnIndex(oid)-1+keyCount();
+		rowAt(row).setCell( col, pduVarbind );
 		return true;
 	}
 	return false;

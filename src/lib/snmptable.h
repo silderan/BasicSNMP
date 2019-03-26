@@ -161,7 +161,6 @@ public:
 	void setCell(Int64 row, Int64 col, const ASN1Variable &var)	{ rowAt(row).cell(col) = var;	}
 
 	const OID &baseOID() const		{ return mBaseOID;	}
-	Int64 oidColumnIndex(const OID &oid) const	{ return static_cast<Int64>(oid.at(mBaseOID.count()).toULongLong()-1);	}
 
 	// Returns the row index giving the oid of the shell.
 	// That is usefull when new data comes from an agent (varbind)
