@@ -36,15 +36,15 @@ class OIDValue
 public:
 	OIDValue()
 	{	}
-	OIDValue(const char *v)
+	explicit OIDValue(const char *v)
 		: mStringValue( v )
 		, mValue( std::stoull(v) )
 	{	}
-	OIDValue(const StdString &s)
+	explicit OIDValue(const StdString &s)
 		: OIDValue( s.data() )
 	{	}
 	template <typename T>
-	OIDValue(T v)
+	explicit OIDValue(T v)
 		: mValue( static_cast<UInt64>(v) )
 	{	}
 
@@ -83,7 +83,7 @@ public:
 	{
 		Int64 i = 0;
 		for( StdString bit : oid )
-			at(i++) = bit;
+			at(i++) = OIDValue(bit);
 	}
 	OID( const char *charStr )
 		: OID( Utils::split( StdString(charStr), '.') )

@@ -69,9 +69,10 @@ public:
 
 	Int64 count()	const	{ return static_cast<Int64>(std::vector<T>::size());	}
 	void resize(Int64 i)	{ std::vector<T>::resize(static_cast<typename std::vector<T>::size_type>(i));	}
+	void reserve(Int64 i)	{ std::vector<T>::reserve(static_cast<typename std::vector<T>::size_type>(i));	}
 
-	void append(const T &t)					{ return this->push_back(t);	}
-	void append(const StdVector<T> &t)		{ return this->push_back(t);	}
+	void append(const T &t)					{ std::vector<T>::push_back(t);	}
+	void append(const StdVector<T> &t)		{ std::vector<T>::insert(std::end(*this), std::begin(t), std::end(t)); }
 
 	const T &operator[](Int64 i) const	{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}
 	T &operator[](Int64 i)				{ return std::vector<T>::operator[](static_cast<typename std::vector<T>::size_type>(i));	}

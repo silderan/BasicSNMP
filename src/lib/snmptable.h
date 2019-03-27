@@ -239,6 +239,19 @@ public:
 	// Adds new rows if needed.
 	// Puts in row and col variable the indexes where the cell is created.
 	bool addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col);
+
+	// Returns the OID for the cell identified by the row and conceptual column index.
+	// This OID can be used to request specific cell data to/from agent.
+	OID cellOID(Int64 row, Int64 col) const
+	{
+		OID oid;
+		oid.reserve( baseOID().count() + 1 + keyCount() );
+		oid.append( baseOID() );
+		oid.append( OIDValue(col) );
+		for( const ASN1Variable &var : keys(row) )
+			oid.append( OIDValue(var.toUnsigned64()) );
+		return oid;
+	}
 };
 
 }	// namespace SNMP

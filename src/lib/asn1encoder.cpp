@@ -274,7 +274,7 @@ bool ASN1Encoder::decodeObjectIdentifierValue(ErrorCode &errorCode, const StdByt
 		value += ba[pos] & 0x7F;
 	}
 	while( ba[pos++] & 0x80 );
-	oidValue = value;
+	oidValue = OIDValue(value);
 	return true;
 }
 
