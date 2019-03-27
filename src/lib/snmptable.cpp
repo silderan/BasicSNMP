@@ -54,18 +54,18 @@ bool Table::addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
 			row = Table::count();
 			// Add a row.
 			append( TableRow() );
-			lastRow().resize( columnCount() );
+			lastRow().resize( columnCount() + keyCount() );
 			// set keys.
 			for( Int64 k = 0; k < keyCount(); ++k )
 				lastRow().setCell(k, oid.at(oidKeyIndex(k)));
 		}
 		// Set column data.
+		col = columnIndex(oid);
 		// This col index is 1-based.
 		// Also, actual column index is moved by the keys
 		// So, if the columnIndex == 2 and there are 4 keys.
 		// the correct column must be 2-1+4 = 5
-		col = columnIndex(oid)-1+keyCount();
-		rowAt(row).setCell( col, pduVarbind );
+		rowAt(row).setCell( col - 1 + keyCount(), pduVarbind );
 		return true;
 	}
 	return false;
