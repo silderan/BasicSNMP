@@ -161,38 +161,38 @@ QString printableErrorCode(const Encoder &snmp)
 	return printableErrorCode(snmp.errorCode());
 }
 
-const QMap<EntryStatus, QString> &entryStatusInfoMap()
+const QMap<StatusEntry, QString> &entryStatusInfoMap()
 {
-	static QMap<EntryStatus, QString> infoMap =
+	static QMap<StatusEntry, QString> infoMap =
 	{
-		{EntryStatus::valid,			"EntryStatus: valid"},
-		{EntryStatus::createRequest,	"EntryStatus: createRequest"},
-		{EntryStatus::underCreation,	"EntryStatus: underCreation"},
-		{EntryStatus::invalid,		"EntryStatus: invalid"}
+		{StatusEntry::valid,			"EntryStatus: valid"},
+		{StatusEntry::createRequest,	"EntryStatus: createRequest"},
+		{StatusEntry::underCreation,	"EntryStatus: underCreation"},
+		{StatusEntry::invalid,		"EntryStatus: invalid"}
 	};
 	return infoMap;
 }
 
-QString entryStatusName(EntryStatus es)
+QString entryStatusName(StatusEntry es)
 {
 	return entryStatusInfoMap().value( es, "EntryStatus: error-code" );
 }
 
-const QMap<StatusRow, QString> &statusRowInfoMap()
+const QMap<RowStatus, QString> &statusRowInfoMap()
 {
-	static QMap<StatusRow, QString> infoMap =
+	static QMap<RowStatus, QString> infoMap =
 	{
-		{StatusRow::active,			"EntryStatus: valid"},
-		{StatusRow::notInService,		"EntryStatus: notInService"},
-		{StatusRow::notReady,			"EntryStatus: notReady"},
-		{StatusRow::createAndGo,		"EntryStatus: createAndGo"},
-		{StatusRow::createAndWait,	"EntryStatus: createAndWait"},
-		{StatusRow::destroy,			"EntryStatus: destroy"}
+		{RowStatus::active,			"EntryStatus: valid"},
+		{RowStatus::notInService,		"EntryStatus: notInService"},
+		{RowStatus::notReady,			"EntryStatus: notReady"},
+		{RowStatus::createAndGo,		"EntryStatus: createAndGo"},
+		{RowStatus::createAndWait,	"EntryStatus: createAndWait"},
+		{RowStatus::destroy,			"EntryStatus: destroy"}
 	};
 	return infoMap;
 }
 
-QString statusRowName(StatusRow sr)
+QString statusRowName(RowStatus sr)
 {
 	return statusRowInfoMap().value( sr, "EntryStatus: error-code" );
 }

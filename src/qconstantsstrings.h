@@ -50,11 +50,11 @@ inline QString printableRawData(const SNMP::PDUVarbind &varbind)
 QString printableErrorCode(SNMP::ASN1Encoder::ErrorCode ec);
 QString printableErrorCode(const SNMP::Encoder &snmp);
 
-const QMap<SNMP::EntryStatus, QString> &entryStatusInfoMap();
-QString entryStatusName(SNMP::EntryStatus es);
+const QMap<SNMP::StatusEntry, QString> &entryStatusInfoMap();
+QString entryStatusName(SNMP::StatusEntry es);
 
-const QMap<SNMP::StatusRow, QString> &statusRowInfoMap();
-QString statusRowName(SNMP::StatusRow sr);
+const QMap<SNMP::RowStatus, QString> &statusRowInfoMap();
+QString statusRowName(SNMP::RowStatus sr);
 
 
 };

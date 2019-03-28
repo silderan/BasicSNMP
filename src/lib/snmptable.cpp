@@ -46,7 +46,7 @@ Int64 Table::rowOf(const OID &cellOID) const
 bool Table::addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
 {
 	OID oid = pduVarbind.oid();
-	if( oid.startsWith(baseOID()) )
+	if( oid.startsWith(baseOID()) && ((col = columnIndex(oid)) <= columnCount()) ) // <= and not < because column un 1-based
 	{
 		row = rowOf(oid);
 		if( row == -1 )
@@ -60,7 +60,6 @@ bool Table::addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col)
 				lastRow().setCell(k, oid.at(oidKeyIndex(k)));
 		}
 		// Set column data.
-		col = columnIndex(oid);
 		// This col index is 1-based.
 		// Also, actual column index is moved by the keys
 		// So, if the columnIndex == 2 and there are 4 keys.

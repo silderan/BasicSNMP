@@ -64,7 +64,7 @@ enum SMIVersion
 };
 
 // Control Column for SMIv1
-enum EntryStatus
+enum StatusEntry
 {
 	valid = 1,
 	createRequest,
@@ -73,7 +73,7 @@ enum EntryStatus
 };
 
 // Control Column for SMIv2
-enum StatusRow
+enum RowStatus
 {
 	active = 1,
 	notInService,
