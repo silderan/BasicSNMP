@@ -73,6 +73,15 @@ namespace Utils {
 
 		Byte octetD() const		{ return ipv4.octets.octetD;    }
 		void setOctetD(Byte d)	{ ipv4.octets.octetD = d;		}
+
+		bool operator==(const IPv4Address &other) const
+		{
+			return ipv4.ipNumber == other.ipv4.ipNumber;
+		}
+		bool operator!=(const IPv4Address &other) const
+		{
+			return ipv4.ipNumber != other.ipv4.ipNumber;
+		}
 	};
 
 	template <typename T, typename C>

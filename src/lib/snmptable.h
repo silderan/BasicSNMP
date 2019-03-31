@@ -28,9 +28,7 @@
 #include "pduvarbind.h"
 #include "stddeque.h"
 
-#ifdef QT_CORE_LIB
-#include <QString>
-#endif
+#include <iostream>
 
 namespace SNMP {
 
@@ -106,152 +104,136 @@ struct TableInfo
 	}
 };
 
-// This two classes below are for known column sized tables.
-// It's much more easy to code and use this ones.
-
-// TableRow class stores one specific row cells data.
-// One row include the keys and regular columns data.
-// But, for the point of view of a standard table, it's just a cell vector.
-// The count of keys and columns must be known before using it.
-// Table class inmediatly resizes the keys and column vectors just after it's been created.
-class TableRow : public StdVector<ASN1Variable>
+class TableBaseInfo
 {
+	const OID &mOIDBase;
+	Int64 mKeyCount;
+	Int64 mFirstColumn;
+	Int64 mLastColumn;
+	Int64 mOIDColumnIndex;
 
 public:
-	void setCell(Int64 colIndex, const ASN1Variable &asn1Var)	{ cell(colIndex) = asn1Var; }
-	void setCell(Int64 colIndex, const OIDValue &oidValue)		{ cell(colIndex).setUnsigned64(oidValue.toULongLong()); }
+	TableBaseInfo(const OID &oidBase, Int64 keyCount, Int64 firstColumn, Int64 lastColumn, Int64 oidColumnIndex )
+		: mOIDBase( oidBase )
+		, mKeyCount( keyCount )
+		, mFirstColumn( firstColumn )
+		, mLastColumn( lastColumn )
+		, mOIDColumnIndex( oidColumnIndex )
+	{	}
 
-	template <typename T>
-	const ASN1Variable &cell(T i) const					{ return at(static_cast<Int64>(i));	}
-	const ASN1Variable &cell(const OIDValue &oid) const	{ return cell(oid.toULongLong());	}
+	Int64 keyCount() const			{ return mKeyCount;			}
+	Int64 firstColumn() const		{ return mFirstColumn;		}
+	Int64 lastColumn() const		{ return mLastColumn;		}
+	const OID &oidBase() const		{ return mOIDBase;			}
+	Int64 oidColumnIndex() const	{ return mOIDColumnIndex;	}
+	OIDValue oidColumnValue(const OID &oid )	{ return oid.at(oidColumnIndex());	}
 
-	template <typename T>
-	ASN1Variable &cell(T i)					{ return at(static_cast<Int64>(i));		}
-	ASN1Variable &cell(const OIDValue &oid)	{ return cell(oid.toULongLong());		}
+	Int64 oidFirstKeyIndex() const			{ return oidColumnIndex()+1;	}
+	Int64 oidKeyIndex(int keyIndex) const	{ return oidFirstKeyIndex()+keyIndex;	}
+	OIDValue oidKeyValue(const OID &oid, int keyIndex) const{ return oid.at(oidKeyIndex(keyIndex));	}
+
+	Int64 columnCount() const		{ return (lastColumn() - firstColumn()) + 1; }
 };
 
-class Table : public StdDeque<TableRow>
+class TableRowBase : public TableBaseInfo
 {
-	OID mBaseOID;
-	Int64 mKeyCount;
-	Int64 mColCount;
-	Int64 mStatusColumnIndex;
+	StdVector<ASN1Variable> mCells;
+	OID mKeys;
 
 public:
-	Table(const OID &baseOID,
-		  Int64 keyCount,
-		  Int64 colCount,
-		  Int64 statusColumnIndex = -1)
-		: mBaseOID(baseOID)
-		, mKeyCount(keyCount)
-		, mColCount(colCount)
-		, mStatusColumnIndex(statusColumnIndex)
+	TableRowBase(const OID &oidBase, Int64 keyCount, Int64 firstColumn, Int64 lastColumn, Int64 oidColumnIndex)
+		: TableBaseInfo ( oidBase, keyCount, firstColumn, lastColumn, oidColumnIndex )
+		, mCells( columnCount() )
+		, mKeys( keyCount )
+	{	}
+
+	Int64 columnToIndex(Int64 column) const		{ return column - firstColumn();	}
+	Int64 indexToColumn(Int64 index) const		{ return index + firstColumn();		}
+
+	bool machKeys(const OID &oid)
 	{
-	}
-	Int64 statusColumnIndex() const		{ return mStatusColumnIndex;	}
-	Int64 keyCount() const				{ return mKeyCount;				}
-	Int64 columnCount() const			{ return mColCount;				}
-
-	// Beware. Never call this functions if statusColumnIndex is not set properly.
-	const ASN1Variable &statusCell(Int64 col) const	{ return cell(col, statusColumnIndex());	}
-	ASN1Variable &statusCell(Int64 col)				{ return cell(col, statusColumnIndex());	}
-
-	const ASN1Variable &cell(Int64 row, Int64 col) const		{ return rowAt(row).cell(col);	}
-	ASN1Variable &cell(Int64 row, Int64 col)					{ return rowAt(row).cell(col);	}
-	void setCell(Int64 row, Int64 col, const ASN1Variable &var)	{ rowAt(row).cell(col) = var;	}
-
-	const OID &baseOID() const		{ return mBaseOID;	}
-
-	// Returns the row index giving the oid of the shell.
-	// That is usefull when new data comes from an agent (varbind)
-	// this funcion gets the keys from the OID and search for the
-	// row having this exact keys.
-	// Returns -1 if no found.
-	// It's used also intercally in the addCell function.
-	Int64 rowOf(const OID &cellOID) const;
-	Int64 rowCount() const		{ return Table::count();		}
-
-	// Those 6 following are a convenient ones for a more readable code.
-
-	const TableRow &firstRow() const		{ return Table::first();		}
-	TableRow &firstRow()					{ return Table::first();		}
-
-	const TableRow &lastRow() const			{ return Table::last();			}
-	TableRow &lastRow()						{ return Table::last();			}
-
-	const TableRow &rowAt(Int64 i) const	{ return Table::at(i);	}
-	TableRow &rowAt(Int64 i)				{ return Table::at(i);	}
-
-	// Returns the index in the cell OID where the conceptual table column is stored.
-	//                     Base OID             C     Keys
-	//          ------------------------------- - ------------
-	// OID   :  1.3.6.1.4.1.33369.1.1.1.1.1.4.1.2.346172.26276
-	// Index :  0 1 2 3 4 5 6 7 8 9 A B C D E F H   I      J
-	//                                          ^
-	// It is allways just after the base OID.
-	Int64 oidColumnIndex() const
-	{
-		return mBaseOID.count();
+		return  oid.endsWith(mKeys);
 	}
 
-	// Returns the index in the cell OID where the conceptual column keys are.
-	//                     Base OID             C     Keys
-	//          ------------------------------- - ------------
-	// OID   :  1.3.6.1.4.1.33369.1.1.1.1.1.4.1.2.346172.26276
-	// Index :  0 1 2 3 4 5 6 7 8 9 A B C D E F H   I      J
-	//                                              ^      ^
-	// They are after the column index.
-	// keyIndex parameter is the 0-relative index of the local key vector.
-	// i.e if there are two keys, must be 0 or 1 (less than keyCount())
-	Int64 oidKeyIndex(Int64 keyIndex) const
-	{
-		return oidColumnIndex() + 1 + keyIndex;
-	}
-	// Returns the conceptual table column index.
-	// It's stored as a value in the cell OID.
-	//                     Base OID             C     Keys
-	//          ------------------------------- - ------------
-	// OID   :  1.3.6.1.4.1.33369.1.1.1.1.1.4.1.2.346172.26276
-	//                                          ^
-	Int64 columnIndex(const OID &cellOID) const
-	{
-		return static_cast<Int64>(cellOID.at(oidColumnIndex()).toULongLong());
-	}
+	const OID &keys() const				{ return mKeys;			}
+	const OIDValue &key(Int64 i) const	{ return mKeys.at(i);	}
+	OIDValue &key(Int64 i)				{ return mKeys.at(i);	}
 
-	// Returns the conceptual table key value.
-	// It's stored as a value in the cell OID.
-	//                     Base OID             C     Keys
-	//          ------------------------------- - ------------
-	// OID   :  1.3.6.1.4.1.33369.1.1.1.1.1.4.1.2.346172.26276
-	//                                               ^     ^
-	// keyIndex parameter is the 0-relative index of the local key vector.
-	// i.e if there are two keys, must be 0 or 1 (less than keyCount())
-	const ASN1Variable &keyValue(Int64 row, Int64 keyIndex) const
-	{
-		return rowAt(row).cell(keyIndex);
-	}
-
-	// Returns the keys value of the row.
-	// It's essentialy an array of keyValue()
-	StdDeque<ASN1Variable> keys(Int64 row) const;
-
-	// Adds a cell with the ASN1Variant data into the table.
-	// Adds new rows if needed.
-	// Puts in row and col variable the indexes where the cell is created.
-	bool addCell(const PDUVarbind &pduVarbind, Int64 &row, Int64 &col);
-
-	// Returns the OID for the cell identified by the row and conceptual column index.
-	// This OID can be used to request specific cell data to/from agent.
-	OID cellOID(Int64 row, Int64 col) const
+	OID cellOID(Int64 col) const
 	{
 		OID oid;
-		oid.reserve( baseOID().count() + 1 + keyCount() );
-		oid.append( baseOID() );
+		oid.reserve( oidBase().count() + 1 + keyCount() );
+		oid.append( oidBase() );
 		oid.append( OIDValue(col) );
-		for( const ASN1Variable &var : keys(row) )
-			oid.append( OIDValue(var.toUnsigned64()) );
+		oid.append( keys() );
+
 		return oid;
 	}
+
+	const ASN1Variable &cell(Int64 col) const	{ return mCells.at( columnToIndex(col) ); }
+	ASN1Variable &cell(Int64 col)				{ return mCells.at( columnToIndex(col) ); }
+
+	PDUVarbind varbind(Int64 col) const		{ return PDUVarbind( cellOID(col), cell(col) ); }
+};
+
+template <class T>
+class TableBase : public StdDeque<T>, public TableBaseInfo
+{
+public:
+	TableBase(const OID &oidBase, Int64 keyCount, Int64 firstColumn, Int64 lastColumn, Int64 oidColumnIndex)
+		: TableBaseInfo ( oidBase, keyCount, firstColumn, lastColumn, oidColumnIndex )
+	{	}
+
+	Int64 indexOf(const OID &oid)
+	{
+		for( Int64 row = 0; row < TableBase::count(); ++row )
+		{
+			if( TableBase::at(row).machKeys(oid) )
+				return row;
+		}
+		return -1;
+	}
+
+	// Sets cell data to the table.
+	// This funcion checks the OID in the varbind to know if it
+	// match to the table base OID.
+	// Also, checks the keys (aka, indexes) in the oid to see
+	// if is necessary to add a new row.
+	// Returns the row col where cell is inserted or -1 if
+	// the data is not for this table.
+	Int64 setCellData(const PDUVarbind &varBind)
+	{
+		if( varBind.oid().startsWith(oidBase()) )
+		{
+			Int64 col = static_cast<Int64>(varBind.oid().at(oidBase().count()).toULongLong());
+			if( col < firstColumn() )
+				std::cerr << __func__ << " column " << col << ", in the OID " << varBind.oid().toStdString() << ", is less than the first configured: " << firstColumn() << std::endl;
+			else
+			if( col > lastColumn() )
+				std::cerr << __func__ << " column " << col << ", in the OID " << varBind.oid().toStdString() << ", is greater than the last configured: " << lastColumn() << std::endl;
+			else
+			{
+				Int64 row = indexOf( varBind.oid() );
+
+				if( row == -1 )
+				{
+					row = TableBase::count();
+					TableBase::append( T() );
+
+					// Copy the keys.
+					for( int key= 0; key < keyCount(); ++key )
+						TableBase::last().key(key) = oidKeyValue( varBind.oid(), key );
+				}
+				TableBase::at(row).cell(col) = varBind;
+				return row;
+			}
+		}
+		return -1;
+	}
+	// Hey, you. It's not a good idea to add functions that accepts
+	// snmp or varbindlist data because it may include non related OIDs
+	// and, for be sure that the incoming data is for the actual table,
+	// is imperative that you use a the above function using PDUVarbind
 };
 
 }	// namespace SNMP
