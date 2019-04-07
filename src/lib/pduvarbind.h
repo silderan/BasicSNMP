@@ -28,35 +28,42 @@
 #include "asn1variable.h"
 namespace SNMP {
 
-class PDUVarbind : public ASN1Variable
+class PDUVarbind
 {
-	OID mOID;
+	ASN1Variable mASN1Var;
 	StdByteVector mRawValue;
+	OID mOID;
 
 public:
-	PDUVarbind( const OID &oid = "", const SNMP::ASN1Variable &asn1Var = SNMP::ASN1Variable() )
-		: SNMP::ASN1Variable(asn1Var)
+	PDUVarbind( const OID &oid = OID(""), const SNMP::ASN1Variable &asn1Var = SNMP::ASN1Variable() )
+		: mASN1Var(asn1Var)
 		, mOID(oid)
 	{
 
 	}
 	PDUVarbind( const PDUVarbind &varbind )
-		: SNMP::ASN1Variable(varbind)
-		, mOID(varbind.mOID)
+		: mASN1Var(varbind.mASN1Var)
 		, mRawValue(varbind.mRawValue)
+		, mOID(varbind.mOID)
 	{
 
 	}
 	void clear()
 	{
-		SNMP::ASN1Variable::clear();
+		mASN1Var.clear();
 		mRawValue.clear();
 	}
-	const StdByteVector &rawValue()const	{ return mRawValue;	}
-	StdByteVector &rawValue()				{ return mRawValue;	}
+	const StdByteVector &rawValue() const			{ return mRawValue;	}
+	StdByteVector &rawValue()						{ return mRawValue;	}
+	void setRawValue(const StdByteVector &rawVal)	{ mRawValue = rawVal;	}
 
-	const OID &oid()const	{ return mOID;	}
-	OID &oid()				{ return mOID;	}
+	const OID &oid() const			{ return mOID;	}
+	OID &oid()						{ return mOID;	}
+	void setOID(const OID &oid)		{ mOID = oid;	}
+
+	const ASN1Variable &asn1Variable() const			{ return mASN1Var;	}
+	ASN1Variable &asn1Variable()						{ return mASN1Var;	}
+	void setASN1Variable(const ASN1Variable &asn1Var)	{ mASN1Var = asn1Var;	}
 };
 
 

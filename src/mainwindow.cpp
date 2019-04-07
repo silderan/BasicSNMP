@@ -241,8 +241,8 @@ void MainWindow::addReplyRow(const OID &oid, const QString &valueType, const QSt
 void MainWindow::addReplyRow(const PDUVarbind &varbind)
 {
 	addReplyRow( varbind.oid(),
-				 SNMPConstants::asn1TypeName(varbind.type()),
-				 SNMPConstants::asn1PrintableValue(varbind),
+				 SNMPConstants::asn1TypeName(varbind.asn1Variable().type()),
+				 SNMPConstants::asn1PrintableValue(varbind.asn1Variable()),
 				 SNMPConstants::printableRawData(varbind) );
 }
 
@@ -620,13 +620,13 @@ void MainWindow::onTableCellReceived(const Encoder &snmp)
 	if( tableInfo.column >= static_cast<UInt64>(ui->columnCount->value()) )
 	{
 		ui->columnCount->setValue( static_cast<int>(tableInfo.column) );
-		mTableColumnInfoList[tableInfo.column + tableInfo.keyIndexes.count() - 1].valueType = tableInfo.varbind.type();
+		mTableColumnInfoList[tableInfo.column + tableInfo.keyIndexes.count() - 1].valueType = tableInfo.varbind.asn1Variable().type();
 		updateHeaderLabel(-1);
 	}
 
 	int row = matchKey( tableInfo.keyIndexes );
 	ui->snmpTable->setItem( row, tableInfo.column + tableInfo.keyIndexes.count() - 1,
-							new QTableWidgetItem( SNMPConstants::asn1PrintableValue(tableInfo.varbind) ) );
+							new QTableWidgetItem( SNMPConstants::asn1PrintableValue(tableInfo.varbind.asn1Variable()) ) );
 }
 
 void MainWindow::onTableReceived(int requestID)

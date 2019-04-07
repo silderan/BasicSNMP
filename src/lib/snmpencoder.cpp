@@ -150,7 +150,7 @@ bool Encoder::decodeAll(const StdByteVector &ba, bool includeRawData)
 			return false;
 		if( !ASN1Encoder::decodeObjectIdentifier(mErrorCode, pduVar.oid(), ba, pos) )
 			return false;
-		if( !ASN1Encoder::decodeUnknown(mErrorCode, ba, pos, pduVar, includeRawData ? &pduVar.rawValue() : nullptr) )
+		if( !ASN1Encoder::decodeUnknown(mErrorCode, ba, pos, pduVar.asn1Variable(), includeRawData ? &pduVar.rawValue() : nullptr) )
 			return false;
 		mVarbindList.append(pduVar);
 	}
@@ -169,7 +169,7 @@ StdByteVector Encoder::encodeRequest() const
 	{
 		varbindEncoded += ASN1Encoder::encodeSequence(StdByteVectorList()
 													 << ASN1Encoder::encodeObjectIdentifier(varbind.oid())
-													 << ASN1Encoder::encodeUnknown(varbind) );
+													 << ASN1Encoder::encodeUnknown(varbind.asn1Variable()) );
 	}
 	return ASN1Encoder::encodeSequence( StdByteVectorList()
 										<< ASN1Encoder::encodeInteger(mVersion, true)
@@ -181,4 +181,3 @@ StdByteVector Encoder::encodeRequest() const
 																	<< ASN1Encoder::encodeInteger(0, true)	// Error Index
 																	<< ASN1Encoder::encodeSequence(StdByteVectorList() << varbindEncoded) ) );	// Varbind List
 }
-

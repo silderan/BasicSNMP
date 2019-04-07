@@ -174,6 +174,19 @@ public:
 	ASN1Variable &cell(Int64 col)				{ return mCells.at( columnToIndex(col) ); }
 
 	PDUVarbind varbind(Int64 col) const		{ return PDUVarbind( cellOID(col), cell(col) ); }
+	PDUVarbindList varbindList(Int64 rowStatusCol) const
+	{
+		PDUVarbindList list;
+
+		if( rowStatusCol != -1 )
+			list.append( varbind(rowStatusCol) );
+
+		for( Int64 col = firstColumn(); col <= lastColumn(); ++col )
+			if( col != rowStatusCol )
+				list.append( varbind(col) );
+
+		return list;
+	}
 };
 
 template <class T>
@@ -224,7 +237,7 @@ public:
 					for( int key= 0; key < keyCount(); ++key )
 						TableBase::last().key(key) = oidKeyValue( varBind.oid(), key );
 				}
-				TableBase::at(row).cell(col) = varBind;
+				TableBase::at(row).cell(col) = varBind.asn1Variable();
 				return row;
 			}
 		}
