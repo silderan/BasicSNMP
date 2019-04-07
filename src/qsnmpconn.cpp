@@ -41,7 +41,7 @@ void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 		if( mAgentPort != 0 )
 			mAgentSocket.close();
 		if( agentPort != 0 )
-			Q_ASSERT( mAgentSocket.bind(agentPort) );
+			Q_ASSERT( mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress) );
 	}
 	mAgentAddress = agentAddress;
 	mAgentPort = agentPort;
