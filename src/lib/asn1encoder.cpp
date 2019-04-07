@@ -233,7 +233,7 @@ StdByteVector ASN1Encoder::encodeOctetString(const StdByteVector &value)
 	StdByteVector ba;
 	ba.append( ASN1TYPE_OCTETSTRING );
 	setLength( ba, 1, value.count() );
-	ba.append( value.data() );
+	ba.append( value );
 	return ba;
 }
 
