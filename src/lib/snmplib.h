@@ -23,6 +23,13 @@
 #ifndef QSNMPLIB_H
 #define QSNMPLIB_H
 
+namespace SNMP {
+	enum Version
+	{
+		V1 = 0,
+		V2 = 1
+	};
+}
 #include "types.h"
 #include "../utils.h"
 #include "stdcharvector.h"
