@@ -69,8 +69,6 @@ public:
 	static int maxNumberSize()			{ return sizeof(double);}
 	ASN1DataType type() const			{ return mDataType;		}
 	void setType(ASN1DataType asn1Type)	{ mDataType = asn1Type;	}
-	bool isNumberType()const;
-	bool isOctetStringType()const;
 
 	void setNull()						{ mDataType = ASN1TYPE_NULL;	}
 

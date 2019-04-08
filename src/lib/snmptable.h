@@ -187,6 +187,16 @@ public:
 
 		return list;
 	}
+	template <class _list>
+	PDUVarbindList varbindList(_list colList) const
+	{
+		PDUVarbindList list;
+
+		for( auto col : colList )
+			list.append( varbind(col) );
+
+		return list;
+	}
 };
 
 template <class T>
