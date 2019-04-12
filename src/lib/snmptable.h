@@ -257,6 +257,40 @@ public:
 	// snmp or varbindlist data because it may include non related OIDs
 	// and, for be sure that the incoming data is for the actual table,
 	// is imperative that you use a the above function using PDUVarbind
+
+	// Returns key row of the key passed..
+	Int64 keyRow( Int64 keyindex, const OIDValue &oid )
+	{
+		assert(keyindex < keyCount());
+		for( int row = 0; row < TableBase::count(); ++row )
+		{
+			if( TableBase::at(row).key(keyindex) == oid )
+				return row;
+		}
+		return -1;
+	}
+	// Returns the row for the matched cell integer value.
+	// Ensure that column stores number values.
+	int cellRow( Int64 column, Int64 value )
+	{
+		for( int row = 0; row < TableBase::count(); ++row )
+		{
+			if( TableBase::at(row).cell(column).toInteger() == value )
+				return row;
+		}
+		return -1;
+	}
+	// Returns the row for the matched cell string value.
+	// Ensure that column stores string-type values (octet string, and so on).
+	int cellRow( Int64 column, const StdString &value )
+	{
+		for( int row = 0; row < TableBase::count(); ++row )
+		{
+			if( TableBase::at(row).cell(column).toStdString() == value )
+				return row;
+		}
+		return -1;
+	}
 };
 
 }	// namespace SNMP
