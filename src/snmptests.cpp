@@ -38,7 +38,7 @@ void testOneInteger(T value, const char *typeName, bool isSigned, const char *bu
 {
 	T newVal;
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1Encoder::encodeInteger(static_cast<T>(value), isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
+	std::cout << ((ASN1Encoder::encodeInteger(static_cast<T>(value), ASN1TYPE_INTEGER, isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
 
 	Int64 pos = 0;
 	ASN1Encoder::ErrorCode errorCode;

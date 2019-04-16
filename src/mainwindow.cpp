@@ -32,17 +32,21 @@ using namespace SNMP;
 
 const QList<ASN1DataType> &MainWindow::asn1Types()
 {
-	static QList<ASN1DataType> setRequestTypes = QList<ASN1DataType>() << ASN1TYPE_INTEGER
-															   << ASN1TYPE_BOOLEAN
-															   << ASN1TYPE_BITSTRING
-															   << ASN1TYPE_OCTETSTRING
-															   << ASN1TYPE_NULL
-															   << ASN1TYPE_OBJECTID
-															   << ASN1TYPE_OBJECTDESC
-															   << ASN1TYPE_EXTERNAL
-															   << ASN1TYPE_REAL
-															   << ASN1TYPE_ENUMERATED
-															   << ASN1TYPE_UTCTime;
+	static QList<ASN1DataType> setRequestTypes = QList<ASN1DataType>()
+																<< ASN1TYPE_INTEGER
+																<< ASN1TYPE_Counter
+																<< ASN1TYPE_Gauge32
+																<< ASN1TYPE_Unsigned64
+																<< ASN1TYPE_BOOLEAN
+																<< ASN1TYPE_BITSTRING
+																<< ASN1TYPE_OCTETSTRING
+																<< ASN1TYPE_NULL
+																<< ASN1TYPE_OBJECTID
+																<< ASN1TYPE_OBJECTDESC
+																<< ASN1TYPE_EXTERNAL
+																<< ASN1TYPE_REAL
+																<< ASN1TYPE_ENUMERATED
+																<< ASN1TYPE_UTCTime;
 	return setRequestTypes;
 }
 
@@ -78,7 +82,7 @@ public:
 		case SMIVersion::SMIv2:
 		{
 			QComboBox *cb = new QComboBox(parent);
-			QMapIterator<RowStatus, QString> it(SNMPConstants::statusRowInfoMap());
+			QMapIterator<RowStatus, QString> it(SNMPConstants::rowStatusInfoMap());
 			while( it.hasNext() )
 			{
 				it.next();
@@ -280,12 +284,11 @@ void MainWindow::on_sendSetRequest_clicked()
 	ASN1Variable asn1Var;
 	switch( ui->valueType->currentData().toInt() )
 	{
-	case ASN1TYPE_BOOLEAN:
-		asn1Var.setBoolean( ui->value->text()=="true" );
-		break;
-	case ASN1TYPE_INTEGER:
-		asn1Var.setInteger( ui->value->text().toInt() );
-		break;
+	case ASN1TYPE_BOOLEAN:		asn1Var.setBoolean( ui->value->text()=="true" );			break;
+	case ASN1TYPE_INTEGER:		asn1Var.setInteger( ui->value->text().toInt() );			break;
+	case ASN1TYPE_Counter:		asn1Var.setCounter( ui->value->text().toUInt() );			break;
+	case ASN1TYPE_Gauge32:		asn1Var.setGauge32( ui->value->text().toUInt() );			break;
+	case ASN1TYPE_Unsigned64:	asn1Var.setUnsigned64( ui->value->text().toULongLong() );	break;
 	case ASN1TYPE_OCTETSTRING:
 		asn1Var.setOctetString( ui->value->text().toStdString() );
 		break;

@@ -114,10 +114,10 @@ private:
 
 public:
 	template<typename T>
-	static inline StdByteVector encodeInteger(T value, bool isUnsigned)
+	static inline StdByteVector encodeInteger(T value, ASN1DataType type, bool isUnsigned)
 	{
 		StdByteVector ba;
-		ba.append( ASN1TYPE_INTEGER );
+		ba.append( type );
 		// For this small values, below 127, no need to go through such complicated code.
 		if( !(value & ~static_cast<T>(0x7F))  )
 		{
@@ -165,7 +165,7 @@ public:
 			ASN1TYPE_Counter,
 			ASN1TYPE_Counter64,
 			ASN1TYPE_Integer64,
-			ASN1TYPE_Gauge,
+			ASN1TYPE_Gauge32,
 			ASN1TYPE_TimeTicks,
 			ASN1TYPE_Unsigned64
 		};
@@ -184,7 +184,7 @@ public:
 			ASN1TYPE_Counter,
 			ASN1TYPE_Counter64,
 			ASN1TYPE_Integer64,
-			ASN1TYPE_Gauge,
+			ASN1TYPE_Gauge32,
 			ASN1TYPE_TimeTicks,
 			ASN1TYPE_Unsigned64
 		};

@@ -89,8 +89,8 @@ public:
 	UInt64 toUnsigned64() const			{ return mDataValue.number.UInteger64;	}
 	void setUnsigned64(UInt64 i)		{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}
 
-	UInt64 toGauge() const	{ return toUnsigned64();	}
-	void setGauge(UInt64 i)	{ mDataType = ASN1TYPE_Gauge;	mDataValue.number.UInteger64 = i;	}
+	UInt32 toGauge32() const	{ return toUInteger32();	}
+	void setGauge32(UInt32 i)	{ mDataType = ASN1TYPE_Gauge32;	mDataValue.number.UInteger32 = i;	}
 
 	UInt64 toGauge64() const	{ return toUnsigned64();	}
 	void setGauge64(UInt64 i)	{ mDataType = ASN1TYPE_Unsigned64;	mDataValue.number.UInteger64 = i;	}

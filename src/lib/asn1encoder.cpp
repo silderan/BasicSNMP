@@ -210,7 +210,7 @@ bool ASN1Encoder::decodeInteger(ErrorCode &errorCode,
 		case ASN1TYPE_Counter:		asnVar.setCounter(ui);		break;
 		case ASN1TYPE_Counter64:	asnVar.setCounter64(ui);	break;
 		case ASN1TYPE_Integer64:	asnVar.setUnsigned64(ui);	break;
-		case ASN1TYPE_Gauge:		asnVar.setGauge(ui);		break;
+		case ASN1TYPE_Gauge32:		asnVar.setGauge32(static_cast<UInt32>(ui));		break;
 		case ASN1TYPE_TimeTicks:	asnVar.setTimeTicks(ui);	break;
 		case ASN1TYPE_Unsigned64:	asnVar.setUnsigned64(ui);	break;
 		}
@@ -474,12 +474,14 @@ bool ASN1Encoder::decodeUnknown(ErrorCode &errorCode,
 		data.setNull();
 		break;
 	case ASN1TYPE_INTEGER:
-	case ASN1TYPE_Gauge:
+	case ASN1TYPE_Gauge32:
 	case ASN1TYPE_Counter:
 	case ASN1TYPE_Counter64:
 	case ASN1TYPE_Integer64:
 	case ASN1TYPE_Unsigned64:
+		data.setType(asn1Type);
 		rtn = decodeInteger(errorCode, data, ba, pos, length);
+		data.setType(asn1Type);
 		break;
 	case ASN1TYPE_OBJECTID:
 		{
@@ -532,12 +534,12 @@ StdByteVector ASN1Encoder::encodeUnknown( const ASN1Variable &pduVariable )
 	switch( pduVariable.type() )
 	{
 	case ASN1TYPE_NULL:			return encodeNULL( );
-	case ASN1TYPE_INTEGER:		return encodeInteger( pduVariable.toInteger(), false );
-	case ASN1TYPE_Gauge:		return encodeInteger( pduVariable.toGauge(), true );
-	case ASN1TYPE_Counter:		return encodeInteger( pduVariable.toCounter(), true );
-	case ASN1TYPE_Counter64:	return encodeInteger( pduVariable.toCounter64(), true );
-	case ASN1TYPE_Integer64:	return encodeInteger( pduVariable.toInteger64(), false );
-	case ASN1TYPE_Unsigned64:	return encodeInteger( pduVariable.toUnsigned64(), false );
+	case ASN1TYPE_INTEGER:		return encodeInteger( pduVariable.toInteger(),		pduVariable.type(), false );
+	case ASN1TYPE_Gauge32:		return encodeInteger( pduVariable.toGauge32(),		pduVariable.type(), true );
+	case ASN1TYPE_Counter:		return encodeInteger( pduVariable.toCounter(),		pduVariable.type(), true );
+	case ASN1TYPE_Counter64:	return encodeInteger( pduVariable.toCounter64(),	pduVariable.type(), true );
+	case ASN1TYPE_Integer64:	return encodeInteger( pduVariable.toInteger64(),	pduVariable.type(), false );
+	case ASN1TYPE_Unsigned64:	return encodeInteger( pduVariable.toUnsigned64(),	pduVariable.type(), false );
 	case ASN1TYPE_OBJECTID:		return encodeObjectIdentifier( pduVariable.toOID() );
 	case ASN1TYPE_OCTETSTRING:	return encodeOctetString( pduVariable.toOctetString() );
 	case ASN1TYPE_IPv4Address:	return encodeIPv4Address( pduVariable.toIPV4() );

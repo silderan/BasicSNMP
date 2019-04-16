@@ -172,12 +172,12 @@ StdByteVector Encoder::encodeRequest() const
 													 << ASN1Encoder::encodeUnknown(varbind.asn1Variable()) );
 	}
 	return ASN1Encoder::encodeSequence( StdByteVectorList()
-										<< ASN1Encoder::encodeInteger(mVersion, true)
+										<< ASN1Encoder::encodeInteger(mVersion, ASN1TYPE_INTEGER, true)
 										<< ASN1Encoder::encodeOctetString(mComunity)
 										<< ASN1Encoder::encodeList(mRequestType,
 																  StdByteVectorList()
-																	<< ASN1Encoder::encodeInteger(mRequestID, false)	// RequestID
-																	<< ASN1Encoder::encodeInteger(0, true)	// Error Code
-																	<< ASN1Encoder::encodeInteger(0, true)	// Error Index
+																	<< ASN1Encoder::encodeInteger(mRequestID, ASN1TYPE_INTEGER, false)	// RequestID
+																	<< ASN1Encoder::encodeInteger(0, ASN1TYPE_INTEGER, true)	// Error Code
+																	<< ASN1Encoder::encodeInteger(0, ASN1TYPE_INTEGER, true)	// Error Index
 																	<< ASN1Encoder::encodeSequence(StdByteVectorList() << varbindEncoded) ) );	// Varbind List
 }

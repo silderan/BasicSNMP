@@ -59,7 +59,7 @@ const QMap<ASN1DataType, QString> &asn1TypeMap()
 
 		{ ASN1TYPE_IPv4Address,		"Complex_IPv4Address" },
 		{ ASN1TYPE_Counter,			"Complex_Counter" },
-		{ ASN1TYPE_Gauge,			"Complex_Gauge" },
+		{ ASN1TYPE_Gauge32,			"Complex_Gauge32" },
 		{ ASN1TYPE_TimeTicks,		"Complex_TimeTicks" },
 		{ ASN1TYPE_Opaque,			"Complex_Opaque" },
 		{ ASN1TYPE_NsapAdderss,		"Complex_NsapAddress" },
@@ -107,7 +107,7 @@ QString asn1PrintableValue(const ASN1Variable &asn1Var)
 	case ASN1TYPE_GeneralizeTime:	return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
 
 	case ASN1TYPE_Counter:		return QString::number( asn1Var.toCounter() );
-	case ASN1TYPE_Gauge:		return QString::number( asn1Var.toGauge() );
+	case ASN1TYPE_Gauge32:		return QString::number( asn1Var.toGauge32() );
 	case ASN1TYPE_TimeTicks:	return QString("%1 secs").arg(asn1Var.toUnsigned64()/100 );
 //	case ASN1TYPE_Float:		return QString::number( asn1Var.toFloat() );
 //	case ASN1TYPE_Double:		return QString::number( asn1Var.toDouble() );
@@ -125,27 +125,27 @@ QString printableErrorCode(ASN1Encoder::ErrorCode ec)
 	switch( ec )
 	{
 	case ASN1Encoder::ErrorCode::DatagramInterrupted:	return "DatagramInterrupted";
-	case ASN1Encoder::ErrorCode::UnsignedMalformed:	return "UnsignedMalformed";
-	case ASN1Encoder::ErrorCode::NotEnoughRoom:		return "NotEnoughRoom";
+	case ASN1Encoder::ErrorCode::UnsignedMalformed:		return "UnsignedMalformed";
+	case ASN1Encoder::ErrorCode::NotEnoughRoom:			return "NotEnoughRoom";
 	case ASN1Encoder::ErrorCode::NoError:				return "NoError";
 	case ASN1Encoder::ErrorCode::TooBig:				return "TooBig";
 	case ASN1Encoder::ErrorCode::NoSuchName:			return "NoSuchName";
-	case ASN1Encoder::ErrorCode::ReadOnly:			return "ReadOnly";
-	case ASN1Encoder::ErrorCode::BadValue:			return "Bad Value";
-	case ASN1Encoder::ErrorCode::GenericError:		return "Generic error";
-	case ASN1Encoder::ErrorCode::NoAccess:			return "No accesible";
-	case ASN1Encoder::ErrorCode::WrongType:			return "Wrong type";
+	case ASN1Encoder::ErrorCode::ReadOnly:				return "ReadOnly";
+	case ASN1Encoder::ErrorCode::BadValue:				return "Bad Value";
+	case ASN1Encoder::ErrorCode::GenericError:			return "Generic error";
+	case ASN1Encoder::ErrorCode::NoAccess:				return "No accesible";
+	case ASN1Encoder::ErrorCode::WrongType:				return "Wrong type";
 	case ASN1Encoder::ErrorCode::WrongLength:			return "Wrong length";
-	case ASN1Encoder::ErrorCode::WrongEncoding:		return "Wrong encoding";
+	case ASN1Encoder::ErrorCode::WrongEncoding:			return "Wrong encoding";
 	case ASN1Encoder::ErrorCode::WrongValue:			return "Wong value";
 	case ASN1Encoder::ErrorCode::NoCreation:			return "Cannot create";
-	case ASN1Encoder::ErrorCode::InconsistentValue:	return "Value inconsistent with other object values";
+	case ASN1Encoder::ErrorCode::InconsistentValue:		return "Value inconsistent with other object values";
 	case ASN1Encoder::ErrorCode::ResourceUnavailable:	return "No resources available";
-	case ASN1Encoder::ErrorCode::CommitFailed:		return "Commit failed; no variables updated";
+	case ASN1Encoder::ErrorCode::CommitFailed:			return "Commit failed; no variables updated";
 	case ASN1Encoder::ErrorCode::UndoFailed:			return "Some variables were updated because undo was not possible";
 	case ASN1Encoder::ErrorCode::AuthorizationError:	return "Authorization error";
 	case ASN1Encoder::ErrorCode::NotWritable:			return "Canot modify object";
-	case ASN1Encoder::ErrorCode::InconsistentName:	return "InconsistentName: Cannot create new object because its inconsistent with other objects";
+	case ASN1Encoder::ErrorCode::InconsistentName:		return "InconsistentName: Cannot create new object because its inconsistent with other objects";
 	}
 	return QString("Encoder::ErrorCode_Unknown_0x%1").arg(ec, 2, 16, QChar('0') );
 }
@@ -163,12 +163,11 @@ QString printableErrorCode(const Encoder &snmp)
 
 const QMap<StatusEntry, QString> &entryStatusInfoMap()
 {
-	static QMap<StatusEntry, QString> infoMap =
-	{
-		{StatusEntry::valid,			"EntryStatus: valid"},
-		{StatusEntry::createRequest,	"EntryStatus: createRequest"},
-		{StatusEntry::underCreation,	"EntryStatus: underCreation"},
-		{StatusEntry::invalid,		"EntryStatus: invalid"}
+	static QMap<StatusEntry, QString> infoMap =  {
+		{ StatusEntry::valid,			"EntryStatus: valid" },
+		{ StatusEntry::createRequest,	"EntryStatus: createRequest" },
+		{ StatusEntry::underCreation,	"EntryStatus: underCreation" },
+		{ StatusEntry::invalid,			"EntryStatus: invalid" }
 	};
 	return infoMap;
 }
@@ -178,23 +177,22 @@ QString entryStatusName(StatusEntry es)
 	return entryStatusInfoMap().value( es, "EntryStatus: error-code" );
 }
 
-const QMap<RowStatus, QString> &statusRowInfoMap()
+const QMap<RowStatus, QString> &rowStatusInfoMap()
 {
-	static QMap<RowStatus, QString> infoMap =
-	{
-		{RowStatus::active,			"EntryStatus: valid"},
-		{RowStatus::notInService,		"EntryStatus: notInService"},
-		{RowStatus::notReady,			"EntryStatus: notReady"},
-		{RowStatus::createAndGo,		"EntryStatus: createAndGo"},
-		{RowStatus::createAndWait,	"EntryStatus: createAndWait"},
-		{RowStatus::destroy,			"EntryStatus: destroy"}
+	static QMap<RowStatus, QString> infoMap = 	{
+		{ RowStatus::active,			"RowStatus: valid" },
+		{ RowStatus::notInService,		"RowStatus: notInService" },
+		{ RowStatus::notReady,			"RowStatus: notReady" },
+		{ RowStatus::createAndGo,		"RowStatus: createAndGo" },
+		{ RowStatus::createAndWait,		"RowStatus: createAndWait" },
+		{ RowStatus::destroy,			"RowStatus: destroy" }
 	};
 	return infoMap;
 }
 
 QString statusRowName(RowStatus sr)
 {
-	return statusRowInfoMap().value( sr, "EntryStatus: error-code" );
+	return rowStatusInfoMap().value( sr, "EntryStatus: error-code" );
 }
 
 };

@@ -53,7 +53,7 @@ QString printableErrorCode(const SNMP::Encoder &snmp);
 const QMap<SNMP::StatusEntry, QString> &entryStatusInfoMap();
 QString entryStatusName(SNMP::StatusEntry es);
 
-const QMap<SNMP::RowStatus, QString> &statusRowInfoMap();
+const QMap<SNMP::RowStatus, QString> &rowStatusInfoMap();
 QString statusRowName(SNMP::RowStatus sr);
 
 
