@@ -259,7 +259,7 @@ public:
 	// is imperative that you use a the above function using PDUVarbind
 
 	// Returns key row of the key passed..
-	Int64 keyRow( Int64 keyindex, const OIDValue &oid )
+	Int64 keyRow( Int64 keyindex, const OIDValue &oid ) const
 	{
 		assert(keyindex < keyCount());
 		for( int row = 0; row < TableBase::count(); ++row )
@@ -269,9 +269,20 @@ public:
 		}
 		return -1;
 	}
+	// Finds a new key for the key row index.
+	// It's usefull for new table intries
+	UInt64 newKeyRowValue( Int64 keyIndex ) const
+	{
+		UInt64 id = 1;
+
+		while( keyRow(keyIndex, SNMP::OIDValue(id)) != -1 )
+			++id;
+
+		return id;
+	}
 	// Returns the row for the matched cell integer value.
 	// Ensure that column stores number values.
-	int cellRow( Int64 column, Int64 value )
+	int cellRow( Int64 column, Int64 value ) const
 	{
 		for( int row = 0; row < TableBase::count(); ++row )
 		{
@@ -280,9 +291,20 @@ public:
 		}
 		return -1;
 	}
+	// Finds a new data for the column.
+	// It's usefull for new table entries.
+	Int64 newCellRowValue( Int64 column ) const
+	{
+		Int64 id = 1;
+
+		while( cellRow(column, id) != -1 )
+			++id;
+
+		return id;
+	}
 	// Returns the row for the matched cell string value.
 	// Ensure that column stores string-type values (octet string, and so on).
-	int cellRow( Int64 column, const StdString &value )
+	int cellRow( Int64 column, const StdString &value ) const
 	{
 		for( int row = 0; row < TableBase::count(); ++row )
 		{
