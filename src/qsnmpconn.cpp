@@ -26,11 +26,21 @@
 #include <QUdpSocket>
 
 using namespace SNMP;
-SNMPConn::SNMPConn(quint16 agentPort, const QString &agentAddress, bool includeRawData)
-	: mAgentPort(0)
+
+SNMPConn::SNMPConn(QObject *papi, bool includeRawData)
+	: QObject(papi)
+	, mAgentPort(0)
 	, mIncludeRawData(includeRawData)
 {
-	setAgentHost(agentAddress, agentPort);
+	connect( &mAgentSocket, &QUdpSocket::readyRead, this, &SNMPConn::onDataReceived );
+}
+
+SNMPConn::SNMPConn(quint16 agentPort, const QString &agentAddress, bool includeRawData, QObject *papi)
+	: QObject(papi)
+	, mAgentPort(0)
+	, mIncludeRawData(includeRawData)
+{
+	setAgentHost( agentAddress, agentPort );
 	connect( &mAgentSocket, &QUdpSocket::readyRead, this, &SNMPConn::onDataReceived );
 }
 

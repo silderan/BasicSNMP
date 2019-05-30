@@ -42,7 +42,8 @@ Q_OBJECT
 	void onDataReceived();
 
 public:
-	SNMPConn(quint16 agentPort = 161, const QString &agentAddress = QString(), bool includeRawData = false);
+	explicit SNMPConn(QObject *papi, bool includeRawData = false);
+	explicit SNMPConn(quint16 agentPort = 161, const QString &agentAddress = QString(), bool includeRawData = false, QObject *papi = Q_NULLPTR);
 
 	void setAgentHost(const QString &agentAddress, quint16 agentPort);
 	void setIncludeRawData(bool includeRawData = true)	{ mIncludeRawData = includeRawData;	}
