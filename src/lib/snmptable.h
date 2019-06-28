@@ -28,6 +28,8 @@
 #include "pduvarbind.h"
 #include "stddeque.h"
 
+#include <random>
+#include <ctime>
 #include <iostream>
 
 namespace SNMP {
@@ -143,7 +145,7 @@ public:
 	TableRowBase( int dataId )
 		: TableBaseInfo<T> (dataId)
 		, mCells( TableRowBase::columnCount() )
-	    , mKeys( TableRowBase::keyCount() )
+		, mKeys( TableRowBase::keyCount() )
 	{	}
 
 	Int64 columnToIndex(Int64 column) const		{ return column - TableRowBase::firstColumn();	}
@@ -271,18 +273,37 @@ public:
 	}
 	// Finds a new key for the key row index.
 	// It's usefull for new table intries
-	UInt64 newKeyRowValue( Int64 keyIndex ) const
+	template<typename Num = UInt64>
+	Num newSequencialKeyRowValue( Int64 keyIndex, Num initialNumber = 1 ) const
 	{
-		UInt64 id = 1;
+		UInt64 id = static_cast<UInt64>(initialNumber);
 
 		while( keyRow(keyIndex, SNMP::OIDValue(id)) != -1 )
 			++id;
 
 		return id;
 	}
-	// Returns the row for the matched cell integer value.
-	// Ensure that column stores number values.
-	int cellRow( Int64 column, Int64 value ) const
+	// Finds a new key for the key row index.
+	// It's usefull for new table intries
+	template<typename Num = UInt64>
+	Num newRandomKeyRowValue( Int64 keyIndex, Num min = 1, Num max = -1 ) const
+	{
+		UInt64 id = static_cast<UInt64>(min);
+
+		static std::mt19937 gen(std::time(nullptr));
+		std::uniform_int_distribution<Num> dis(min, max);
+
+		do
+		{
+			id = static_cast<UInt64>( dis(gen) );
+		}
+		while( keyRow(keyIndex, SNMP::OIDValue(id)) != -1 );
+
+		return id;
+	}
+	// Returns the row index where the comun' cell has the value passed.
+	// Be sure before calling that column stores number values.
+	int findCellRow( Int64 column, Int64 value ) const
 	{
 		for( int row = 0; row < TableBase::count(); ++row )
 		{
@@ -291,20 +312,20 @@ public:
 		}
 		return -1;
 	}
-	// Finds a new data for the column.
-	// It's usefull for new table entries.
+	// Returns a new data for the column.
+	// It's usefull for new table entries where the entry must be unique per column.
 	Int64 newCellRowValue( Int64 column ) const
 	{
 		Int64 id = 1;
 
-		while( cellRow(column, id) != -1 )
+		while( findCellRow(column, id) != -1 )
 			++id;
 
 		return id;
 	}
-	// Returns the row for the matched cell string value.
-	// Ensure that column stores string-type values (octet string, and so on).
-	int cellRow( Int64 column, const StdString &value ) const
+	// Returns the row index where the comun' cell has the value passed.
+	// Be sure before calling that column stores string-type values (octet string, and so on).
+	int findCellRow( Int64 column, const StdString &value ) const
 	{
 		for( int row = 0; row < TableBase::count(); ++row )
 		{
@@ -312,6 +333,18 @@ public:
 				return row;
 		}
 		return -1;
+	}
+	// Returns a new data for the column.
+	// It's usefull for new table entries where the entry must be unique per column.
+	template<typename Num = Int64>
+	StdString newCellRowValue( Int64 column, const StdString &prefix, Num initial = 1 ) const
+	{
+		Int64 id = static_cast<Int64>(initial);
+
+		while( findCellRow(column, prefix + std::to_string(id)) != -1 )
+			++id;
+
+		return prefix + std::to_string(id);
 	}
 };
 
