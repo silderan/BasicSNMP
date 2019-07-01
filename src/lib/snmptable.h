@@ -209,13 +209,19 @@ public:
 		: TableBaseInfo<T>(dataId)
 	{	}
 
-	Int64 indexOf(const OID &oid)
+	Int64 rowOf(const OID &oid)
 	{
 		for( Int64 row = 0; row < TableBase::count(); ++row )
 		{
 			if( TableBase::at(row).machKeys(oid) )
 				return row;
 		}
+		return -1;
+	}
+	Int64 rowOf(const PDUVarbind &varBind)
+	{
+		if( varBind.oid().startsWith(TableBase::oidBase()) )
+			return rowOf( varBind.oid() );
 		return -1;
 	}
 
@@ -238,7 +244,7 @@ public:
 				std::cerr << __func__ << " column " << col << ", in the OID " << varBind.oid().toStdString() << ", is greater than the last configured: " << TableBase::lastColumn() << std::endl;
 			else
 			{
-				Int64 row = indexOf( varBind.oid() );
+				Int64 row = rowOf( varBind.oid() );
 
 				if( row == -1 )
 				{
@@ -254,6 +260,15 @@ public:
 			}
 		}
 		return -1;
+	}
+	void removeRow(Int64 row)
+	{
+		if( (row >= 0) && (row < TableBase::count()) )
+			TableBase::removeAt(row);
+	}
+	void removeRow(const PDUVarbind &varBind)
+	{
+		removeRow( rowOf(varBind) );
 	}
 	// Hey, you. It's not a good idea to add functions that accepts
 	// snmp or varbindlist data because it may include non related OIDs

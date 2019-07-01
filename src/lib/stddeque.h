@@ -31,15 +31,12 @@ template <typename T>
 class StdDeque : public std::deque<T>
 {
 public:
-	StdDeque &append(const StdDeque<T> &t)
-	{
-		StdDeque<T>::push_back(t);
-	}
+	StdDeque &append(const StdDeque<T> &t)	{ StdDeque<T>::push_back(t);	}
+	void append(const T &t)					{ std::deque<T>::push_back(t);	}
+
+	void removeAt(Int64 i)					{ std::deque<T>::erase( this->begin()+i );	}
+
 	StdDeque &operator+=(const StdDeque<T> t)		{ return append(t);	}
-	void append(const T &t)
-	{
-		std::deque<T>::push_back(t);
-	}
 	StdDeque &operator+=(const T &other)	{ append(other); return *this; 	}
 	StdDeque &operator<<(const T &other)	{ append(other); return *this;	}
 
