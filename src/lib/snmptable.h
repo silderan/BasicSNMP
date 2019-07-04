@@ -151,7 +151,7 @@ public:
 	Int64 columnToIndex(Int64 column) const		{ return column - TableRowBase::firstColumn();	}
 	Int64 indexToColumn(Int64 index) const		{ return index + TableRowBase::firstColumn();	}
 
-	bool machKeys(const OID &oid)
+	bool machKeys(const OID &oid) const
 	{
 		return  oid.endsWith(mKeys);
 	}
@@ -209,7 +209,7 @@ public:
 		: TableBaseInfo<T>(dataId)
 	{	}
 
-	Int64 rowOf(const OID &oid)
+	Int64 rowOf(const OID &oid) const
 	{
 		for( Int64 row = 0; row < TableBase::count(); ++row )
 		{
@@ -218,7 +218,7 @@ public:
 		}
 		return -1;
 	}
-	Int64 rowOf(const PDUVarbind &varBind)
+	Int64 rowOf(const PDUVarbind &varBind) const
 	{
 		if( varBind.oid().startsWith(TableBase::oidBase()) )
 			return rowOf( varBind.oid() );
