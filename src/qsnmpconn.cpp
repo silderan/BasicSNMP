@@ -46,15 +46,15 @@ SNMPConn::SNMPConn(quint16 agentPort, const QString &agentAddress, bool includeR
 
 void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 {
-	if( agentPort != mAgentPort )
+	if( (agentPort != mAgentPort) || (agentAddress != mAgentAddress) )
 	{
 		if( mAgentPort != 0 )
 			mAgentSocket.close();
 		if( agentPort != 0 )
-			Q_ASSERT( mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress) );
+			Q_ASSERT( mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) );
+		mAgentAddress = agentAddress;
+		mAgentPort = agentPort;
 	}
-	mAgentAddress = agentAddress;
-	mAgentPort = agentPort;
 }
 
 void SNMPConn::sendRequest(const Encoder &snmpDeco)
