@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-		lib/snmptable.cpp \
 		lib/asn1encoder.cpp \
 		lib/snmpencoder.cpp \
 		snmptests.cpp \
