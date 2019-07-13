@@ -45,6 +45,8 @@ public:
 	explicit SNMPConn(QObject *papi, bool includeRawData = false);
 	explicit SNMPConn(quint16 agentPort = 161, const QString &agentAddress = QString(), bool includeRawData = false, QObject *papi = Q_NULLPTR);
 
+	const QString &agentAddress() const	{ return mAgentAddress;	}
+	quint16 agentPort() const			{ return mAgentPort;	}
 	void setAgentHost(const QString &agentAddress, quint16 agentPort);
 	void setIncludeRawData(bool includeRawData = true)	{ mIncludeRawData = includeRawData;	}
 	bool includeRawData() const							{ return mIncludeRawData;	}
