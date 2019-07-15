@@ -38,10 +38,12 @@ SNMPConn::SNMPConn(QObject *papi, bool includeRawData)
 SNMPConn::SNMPConn(quint16 agentPort, const QString &agentAddress, bool includeRawData, QObject *papi)
 	: QObject(papi)
 	, mAgentPort(0)
+	, mTrapPort(0)
 	, mIncludeRawData(includeRawData)
 {
 	setAgentHost( agentAddress, agentPort );
 	connect( &mAgentSocket, &QUdpSocket::readyRead, this, &SNMPConn::onDataReceived );
+	connect( &mTrapSocket, &QUdpSocket::readyRead, this, &SNMPConn::onTrapReceived );
 }
 
 void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
@@ -54,6 +56,18 @@ void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 			Q_ASSERT( mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) );
 		mAgentAddress = agentAddress;
 		mAgentPort = agentPort;
+	}
+}
+
+void SNMPConn::setTrapHost(quint16 trapPort)
+{
+	if( mTrapPort != trapPort )
+	{
+		if( mTrapPort != 0 )
+			mTrapSocket.close();
+		if( trapPort != 0 )
+			Q_ASSERT( mTrapSocket.bind(trapPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) );
+		mTrapPort = trapPort;
 	}
 }
 
@@ -127,5 +141,17 @@ void SNMPConn::onDataReceived()
 				emit tableReceived( snmp.requestID() );
 			}
 		}
+	}
+}
+
+void SNMPConn::onTrapReceived()
+{
+	if( mTrapSocket.hasPendingDatagrams() )
+	{
+		StdByteVector datagram( static_cast<Int64>(mAgentSocket.pendingDatagramSize()) );
+		mAgentSocket.readDatagram( datagram.chars(), datagram.count() );
+		Encoder snmp;
+		snmp.decodeAll(datagram, includeRawData());
+		emit trapReceived(snmp);
 	}
 }

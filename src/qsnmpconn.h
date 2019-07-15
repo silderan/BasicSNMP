@@ -35,17 +35,21 @@ Q_OBJECT
 	QString mAgentAddress;
 	quint16 mAgentPort;
 	QUdpSocket mAgentSocket;
+	quint16 mTrapPort;
+	QUdpSocket mTrapSocket;
 	bool mIncludeRawData;		// This is usefull for debuging applications.
 
 	QMap<int, SNMP::OID> mTableRequestMap;
 
 	void onDataReceived();
+	void onTrapReceived();
 
 public:
 	explicit SNMPConn(QObject *papi, bool includeRawData = false);
 	explicit SNMPConn(quint16 agentPort = 161, const QString &agentAddress = QString(), bool includeRawData = false, QObject *papi = Q_NULLPTR);
 
 	void setAgentHost(const QString &agentAddress, quint16 agentPort);
+	void setTrapHost(quint16 trapPort);
 	void setIncludeRawData(bool includeRawData = true)	{ mIncludeRawData = includeRawData;	}
 	bool includeRawData() const							{ return mIncludeRawData;	}
 
@@ -81,6 +85,7 @@ public:
 
 signals:
 	void dataReceived(const SNMP::Encoder &snmp);
+	void trapReceived(const SNMP::Encoder &snmp);
 	void tableCellReceived(const SNMP::Encoder &snmp);
 	void tableReceived(int requestID);
 };

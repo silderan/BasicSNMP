@@ -172,6 +172,8 @@ MainWindow::MainWindow(QWidget *parent)
 	connect( ui->columnValueType, SIGNAL(currentIndexChanged(int)), this, SLOT(onColumnValueTypeChanged(int)) );
 	connect( ui->smiVersion, SIGNAL(currentIndexChanged(int)), this, SLOT(onSMIVersionChanged(int)) );
 	connect( ui->rows, SIGNAL(valueChanged(int)), this, SLOT(onRowsChanged(int)) );
+
+	snmpConn.setTrapHost(162);
 }
 
 MainWindow::~MainWindow()
