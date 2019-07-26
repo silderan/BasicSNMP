@@ -89,7 +89,7 @@ QString asn1PrintableValue(const ASN1Variable &asn1Var)
 	switch( asn1Var.type() )
 	{
 	case ASN1TYPE_BOOLEAN:		return asn1Var.toBoolean() ? "true" : "false";
-	case ASN1TYPE_INTEGER:		return QString::number( asn1Var.toUInteger() );
+	case ASN1TYPE_INTEGER:		return QString::number( asn1Var.toInteger() );
 	case ASN1TYPE_NULL:			return "<null>";
 	case ASN1TYPE_OBJECTID:		return QString::fromStdString( asn1Var.toOID().toStdString() );
 

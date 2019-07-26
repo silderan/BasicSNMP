@@ -200,7 +200,7 @@ bool ASN1Encoder::decodeInteger(ErrorCode &errorCode,
 							   Int64 &pos,
 							   Int64 length)
 {
-	if( ba[pos] & 0x80 )
+	if( !(ba[pos] & 0x80) )
 	{
 		UInt64 ui;
 		bool rtn = decodeInteger(errorCode, ui, ba, pos, length, true);

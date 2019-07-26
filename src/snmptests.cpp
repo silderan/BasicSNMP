@@ -34,15 +34,15 @@
 
 using namespace SNMP;
 template<typename T>
-void testOneInteger(T value, const char *typeName, bool isSigned, const char *buff, int buffSize)
+void testOneInteger(T value, const char *typeName, bool isUnsigned, const char *buff, int buffSize)
 {
 	T newVal;
 	StdByteVector ba(buff, buffSize);
-	std::cout << ((ASN1Encoder::encodeInteger(static_cast<T>(value), ASN1TYPE_INTEGER, isSigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
+	std::cout << ((ASN1Encoder::encodeInteger(static_cast<T>(value), ASN1TYPE_INTEGER, isUnsigned) == ba) ? "Ok" : "Fail") << " setInteger<"<<typeName<<">("<<value<<") " << std::endl;
 
 	Int64 pos = 0;
-	ASN1Encoder::ErrorCode errorCode;
-	ASN1Encoder::decodeInteger( errorCode, newVal, ba, pos, isSigned );
+	ASN1Encoder::ErrorCode errorCode = ASN1Encoder::ErrorCode::NoError;
+	ASN1Encoder::decodeInteger( errorCode, newVal, ba, pos, isUnsigned );
 	std::cout << ((newVal == value) ? "Ok" : "Fail") << " getInteger<" << typeName << ">("<<value<<") " << newVal << " Error code=" << errorCode << std::endl;
 }
 
@@ -50,6 +50,7 @@ void testOneInteger(T value, const char *typeName, bool isSigned, const char *bu
 
 void testIntegers()
 {
+	TEST_ONE_INTEGER( 0xFF7F, qint16, false, "\x02\x02\xFF\x7F" );
 	TEST_ONE_INTEGER( 0xFFFF, quint16, true, "\x02\x03\x00\xFF\xFF" );
 	TEST_ONE_INTEGER( 0xFFFFFFFF, quint32, true, "\x02\x05\x00\xFF\xFF\xFF\xFF" );
 	TEST_ONE_INTEGER( 0xFFFFFFFFFFFFFFFF, quint64, true, "\x02\x09\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF" );
