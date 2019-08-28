@@ -23,6 +23,7 @@
 #define STDDEQUE_H
 
 #include <deque>
+#include <functional>
 
 #include "basic_types.h"
 
@@ -52,6 +53,28 @@ public:
 	T &last()				{ return std::deque<T>::back();	}
 
 	bool isEmpty()			{ return count() == 0;	}
+
+	StdDeque filter( std::function<bool(const T&)> filterFnc ) const
+	{
+		StdDeque rtn;
+		for( const T &t : *this )
+			if( filterFnc(t) )
+				rtn.append(t);
+		return rtn;
+	}
+	Int64 indexOf( std::function<bool(const T&)> filterFnc, int startsWith = 0 ) const
+	{
+		if( (startsWith >= 0) && (startsWith < count()) )
+		{
+			do
+			{
+				if( filter(at(startsWith)) )
+					return startsWith;
+			}
+			while( ++startsWith < count() );
+		}
+		return -1;
+	}
 };
 }
 #endif // STDDEQUE_H
