@@ -62,13 +62,13 @@ public:
 				rtn.append(t);
 		return rtn;
 	}
-	Int64 indexOf( std::function<bool(const T&)> filterFnc, int startsWith = 0 ) const
+	Int64 indexOf( std::function<bool(const T&)> filterFnc, Int64 startsWith = 0 ) const
 	{
 		if( (startsWith >= 0) && (startsWith < count()) )
 		{
 			do
 			{
-				if( filter(at(startsWith)) )
+				if( filterFnc(at(startsWith)) )
 					return startsWith;
 			}
 			while( ++startsWith < count() );
