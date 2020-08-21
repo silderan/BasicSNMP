@@ -50,6 +50,8 @@ const QList<ASN1DataType> &MainWindow::asn1Types()
 	return setRequestTypes;
 }
 
+#define TABLE_REQUEST_ID	10000
+
 class QStatusColumnComboBoxDelegate : public QStyledItemDelegate
 {
 	std::function<SMIVersion()> mGetSMIVer;
@@ -254,6 +256,14 @@ void MainWindow::addReplyRow(const PDUVarbind &varbind)
 
 void MainWindow::onSNMPDataReceived(const Encoder &snmp)
 {
+	if( snmp.requestID() > TABLE_REQUEST_ID )
+	{
+		updateSnmpTableCell( TableInfo(ui->oidBase->text().toStdString().data(), snmp) );
+
+		if( mGetColumnsOidList.count() )
+			getColumns_RequestFirst();
+		return;
+	}
 	ui->replyTable->setRowCount(0);
 
 	if( !snmp.varbindList().count() )
@@ -504,31 +514,77 @@ void MainWindow::onSMIVersionChanged(int index)
 	updateStatusColumnValues(-1);
 }
 
-void MainWindow::on_getTable_clicked()
+void MainWindow::on_getColumnsStart_clicked()
 {
+	if( snmpConn.isDiscoveringTable(TABLE_REQUEST_ID) )
+		ui->statusBar->showMessage( tr("Aun se está descubriendo la tabla. Cancela o espera a que termine el proceso.") );
+	else
 	if( !ui->oidBase->text().length() )
 		ui->statusBar->showMessage( tr("Falta el OID base de la tabla") );
 	else
 	{
-//		SNMPDecoder snmp;
-//		snmpConn.setAgentHost( ui->agentIP->text(), static_cast<quint16>(ui->agentPort->value()) );
-//		snmp.setVersion( ui->version->currentData(Qt::UserRole).toInt() );
-//		snmp.setComunity( ui->comunity->currentText() );
-//		snmp.setRequestID( ++mRequestID );
-//		snmp.setRequestType( ASN1TYPE_GetNextRequestPDU );
+		int initialColum = ui->getColumnsFirstColumn->value();
+		int finalColumn = ui->getColumnsLastColumn->value();
 
-//		for( int col = 0, i = 0; i < ui->snmpTable->columnCount(); ++i )
-//			if( !mTableColumnInfoList[i].isKeyColumn() )
-//			{
-//				QString oid = QString("%1.%2").arg(ui->oidBase->text()).arg(++col);
-//				snmp.addPDUVar( PDUVarbind(oid) );
-//			}
+		if( finalColumn > ui->columnCount->value() )
+		{
+			finalColumn = ui->columnCount->value();
+			ui->getColumnsLastColumn->setValue(finalColumn);
+		}
+		if( initialColum > ui->columnCount->value() )
+		{
+			initialColum = ui->columnCount->value();
+			ui->getColumnsFirstColumn->setValue(initialColum);
+		}
+		if( initialColum > finalColumn )
+		{
+			finalColumn = initialColum;
+			ui->getColumnsLastColumn->setValue(finalColumn);
+		}
+		while( initialColum <= finalColumn )
+		{
+			QString oidBase = ui->oidBase->text();
+			QString oidKeys;
+			if( !oidBase.endsWith('.') )
+				oidBase.append('.');
 
-//		snmpConn.sendRequest( snmp );
+			// Go though all rows of all columns to clean text and, also, get OID List
+			for( int row = 0; row < ui->snmpTable->rowCount(); ++row )
+			{
+				oidKeys.clear();
+				for( int col = 0; col < ui->keyCount->value(); col++ )
+				{
+					oidKeys.append( QString(".%1").arg(ui->snmpTable->item(row, col)->text()) );
+					ui->snmpTable->item(row, ui->keyCount->value() + initialColum - 1)->setText("");
+				}
+				mGetColumnsOidList.append( QString("%1%2%3").arg(oidBase).arg(initialColum).arg(oidKeys) );
+			}
+
+			initialColum++;
+		}
+		if( ui->getColumnsRequestCount->value() < 1 )
+			ui->getColumnsRequestCount->setValue(1);
+		for( int i = 0; (i < ui->getColumnsRequestCount->value()) && (i < mGetColumnsOidList.count()); i++ )
+			getColumns_RequestFirst();
 	}
 }
 
-#define TABLE_REQUEST_ID	10000
+void MainWindow::getColumns_RequestFirst()
+{
+	if( mGetColumnsOidList.count() )
+	{
+		SNMP::Encoder snmp;
+		snmp.setVersion( ui->version->currentData(Qt::UserRole).toInt() );
+		snmp.setComunity( ui->comunity->currentText().toStdString() );
+		snmp.setRequestType( ASN1TYPE_GetRequestPDU );
+
+		snmp.setRequestID( TABLE_REQUEST_ID + mGetColumnsOidList.count() );
+		snmp.setObjectIdentifier( mGetColumnsOidList.first().toLatin1().data() );
+		mGetColumnsOidList.pop_front();
+		snmpConn.sendRequest(snmp);
+	}
+}
+
 void MainWindow::on_discoverTable_clicked()
 {
 	if( snmpConn.isDiscoveringTable(TABLE_REQUEST_ID) )
@@ -552,7 +608,7 @@ void MainWindow::on_discoverTable_clicked()
 	}
 }
 
-int MainWindow::matchKey(OID keys)
+int MainWindow::rowOf(OID keys)
 {
 	int col, row;
 	for( row = 0; row < ui->snmpTable->rowCount(); ++row )
@@ -566,10 +622,14 @@ int MainWindow::matchKey(OID keys)
 		if( col == keys.count() )
 			break;
 	}
-	// Not found.
+
+	// If row is a new one...
 	if( row == ui->snmpTable->rowCount() )
 	{
+		// By setting this value, row count will increase acordingly.
 		ui->rows->setValue(row+1);
+
+		// Put OID key values into widget table cells.
 		for( col = 0; col < keys.count(); ++col )
 			ui->snmpTable->setItem(row, col, new QTableWidgetItem( QString::fromStdString(keys[col].toStdString())) );
 	}
@@ -612,16 +672,14 @@ void MainWindow::updateStatusColumnValues(int col)
 	}
 }
 
-void MainWindow::onTableCellReceived(const Encoder &snmp)
+void MainWindow::updateSnmpTableCell(const TableInfo &tableInfo)
 {
-	ui->statusBar->showMessage( SNMPConstants::printableErrorCode(snmp) );
-	TableInfo tableInfo(snmpConn.tableBaseOID(TABLE_REQUEST_ID), snmp);
-
 	if( tableInfo.keyIndexes.count() != ui->keyCount->value() )
 	{
 		ui->keyCount->setValue( static_cast<int>(tableInfo.keyIndexes.count()) );
 	}
 
+	// If incoming cell is for a new one column, let's modify the table widget to make room for it.
 	if( tableInfo.column >= static_cast<UInt64>(ui->columnCount->value()) )
 	{
 		ui->columnCount->setValue( static_cast<int>(tableInfo.column) );
@@ -629,9 +687,18 @@ void MainWindow::onTableCellReceived(const Encoder &snmp)
 		updateHeaderLabel(-1);
 	}
 
-	int row = matchKey( tableInfo.keyIndexes );
-	ui->snmpTable->setItem( row, tableInfo.column + tableInfo.keyIndexes.count() - 1,
-							new QTableWidgetItem( SNMPConstants::asn1PrintableValue(tableInfo.varbind.asn1Variable()) ) );
+	int row = rowOf( tableInfo.keyIndexes );
+	QTableWidgetItem *item = new QTableWidgetItem( SNMPConstants::asn1PrintableValue(tableInfo.varbind.asn1Variable()) );
+	item->setToolTip( SNMPConstants::printableRawData(tableInfo.varbind) );
+
+	ui->snmpTable->setItem( row, tableInfo.column + tableInfo.keyIndexes.count() - 1, item );
+}
+
+void MainWindow::onTableCellReceived(const Encoder &snmp)
+{
+	ui->statusBar->showMessage( SNMPConstants::printableErrorCode(snmp) );
+
+	updateSnmpTableCell( TableInfo(snmpConn.tableBaseOID(TABLE_REQUEST_ID), snmp) );
 }
 
 void MainWindow::onTableReceived(int requestID)
@@ -705,7 +772,7 @@ void MainWindow::on_sendTable_clicked()
 	snmp.setComunity( ui->comunity->currentText().toStdString() );
 	snmp.setRequestType( ASN1TYPE_SetRequestPDU );
 	OID keys;
-	keys.reserve( static_cast<UInt64>(mTableColumnInfoList.keyColumnCount()) );
+	keys.reserve( static_cast<Int64>(mTableColumnInfoList.keyColumnCount()) );
 	for( int row = 0; row < ui->snmpTable->rowCount(); ++row )
 	{
 		keys.clear();

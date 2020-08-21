@@ -260,6 +260,7 @@ class MainWindow : public QMainWindow
 	int mRequestID;
 	TableColumnInfoList mTableColumnInfoList;
 	SNMP::SMIVersion mSMIVersion;
+	QStringList mGetColumnsOidList;
 
 	SNMP::ASN1DataType currentValueType(QComboBox *cb)const;
 	SNMP::ASN1DataType valueType(QComboBox *cb, int index)const;
@@ -274,8 +275,11 @@ class MainWindow : public QMainWindow
 //	void addSNMPTableColumn(int widgetColumn, ASN1Type colType, bool readOnly, const QString colName);
 	void setupSNMPTableTab();
 
-	int matchKey(SNMP::OID keys);
+	int rowOf(SNMP::OID keys);
 	void updateStatusColumnValues(int col);
+	void updateSnmpTableCell(const SNMP::TableInfo &tableInfo);
+
+	void getColumns_RequestFirst();
 public:
 	explicit MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
@@ -300,10 +304,10 @@ private slots:
 	void on_trapEnabled_stateChanged(int checked);
 	void on_columnLocalIndex_currentIndexChanged(int index);
 	void on_columnAlias_textChanged(const QString &text);
-	void on_getTable_clicked();
 	void on_discoverTable_clicked();
 	void on_statusColumn_currentIndexChanged(int index);
 	void on_sendTable_clicked();
+	void on_getColumnsStart_clicked();
 };
 
 #endif // MAINWINDOW_H

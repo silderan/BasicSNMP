@@ -53,7 +53,7 @@ void SNMPConn::setAgentHost(const QString &agentAddress, quint16 agentPort)
 		if( mAgentPort != 0 )
 			mAgentSocket.close();
 		if( agentPort != 0 )
-			Q_ASSERT( mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) );
+			mAgentSocket.bind(agentPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint);
 		mAgentAddress = agentAddress;
 		mAgentPort = agentPort;
 	}
@@ -66,7 +66,7 @@ void SNMPConn::setTrapHost(quint16 trapPort)
 		if( mTrapPort != 0 )
 			mTrapSocket.close();
 		if( trapPort != 0 )
-			Q_ASSERT( mTrapSocket.bind(trapPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint) );
+			mTrapSocket.bind(trapPort, QAbstractSocket::ShareAddress | QAbstractSocket::ReuseAddressHint);
 		mTrapPort = trapPort;
 	}
 }
@@ -74,8 +74,9 @@ void SNMPConn::setTrapHost(quint16 trapPort)
 void SNMPConn::sendRequest(const Encoder &snmpDeco)
 {
 	StdByteVector data = snmpDeco.encodeRequest();
+	qint64 writtenBytes = mAgentSocket.writeDatagram(data.chars(), data.count(), QHostAddress(mAgentAddress), mAgentPort);
 
-	Q_ASSERT( mAgentSocket.writeDatagram( data.chars(), data.count(), QHostAddress(mAgentAddress), mAgentPort) != -1 );
+	Q_ASSERT( writtenBytes != -1 );
 }
 
 void SNMPConn::sendGetRequest(int version, const OID &oid, const QString &comunity, int requestID)
@@ -104,6 +105,7 @@ void SNMPConn::discoverTable(int version, const OID &oid, const QString &comunit
 	Q_ASSERT( !mTableRequestMap.contains(requestID) );
 	mTableRequestMap[requestID] = oid;
 
+	qDebug() << "Discovering table";
 	sendGetNextRequest(version, oid, comunity, requestID);
 }
 

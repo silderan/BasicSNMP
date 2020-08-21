@@ -281,25 +281,78 @@
         <string>Tab 2</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="10" colspan="2">
-         <widget class="Line" name="line_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item row="5" column="10">
+         <widget class="QLabel" name="label_19">
+          <property name="text">
+           <string>Read Only</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="2" column="11">
-         <widget class="QComboBox" name="columnLocalIndex">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+        <item row="2" column="5">
+         <widget class="QPushButton" name="sendTable">
+          <property name="text">
+           <string>Send Table</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="6" rowspan="6">
-         <widget class="Line" name="line_3">
+        <item row="2" column="7">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>Keys columns</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="7">
+         <widget class="QLabel" name="label_17">
+          <property name="text">
+           <string>Rows</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="5">
+         <widget class="QLineEdit" name="oidBase"/>
+        </item>
+        <item row="3" column="10">
+         <widget class="QLabel" name="label_12">
+          <property name="text">
+           <string>Column Alias</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10">
+         <widget class="QLabel" name="statusColumnLabel">
+          <property name="text">
+           <string>Status Column</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="8">
+         <widget class="QSpinBox" name="rows">
+          <property name="maximum">
+           <number>65535</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="8">
+         <widget class="QComboBox" name="smiVersion"/>
+        </item>
+        <item row="0" column="9" rowspan="6">
+         <widget class="Line" name="line_2">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -312,6 +365,67 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="7">
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>Regular columns</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>OID Base</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="12">
+         <widget class="QTableWidget" name="snmpTable"/>
+        </item>
+        <item row="2" column="11">
+         <widget class="QComboBox" name="columnLocalIndex">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
+         <widget class="QComboBox" name="statusColumn"/>
+        </item>
+        <item row="1" column="10" colspan="2">
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="discoverTable">
+          <property name="text">
+           <string>Discover Table</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6" rowspan="6">
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="10">
+         <widget class="QLabel" name="label_13">
+          <property name="text">
+           <string>Local Index</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
@@ -331,19 +445,6 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="0" colspan="12">
-         <widget class="QTableWidget" name="snmpTable"/>
-        </item>
-        <item row="0" column="9" rowspan="6">
-         <widget class="Line" name="line_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="11">
-         <widget class="QComboBox" name="statusColumn"/>
-        </item>
         <item row="4" column="10">
          <widget class="QLabel" name="label_11">
           <property name="text">
@@ -354,51 +455,10 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="10">
-         <widget class="QLabel" name="label_19">
+        <item row="0" column="7">
+         <widget class="QLabel" name="label_15">
           <property name="text">
-           <string>Read Only</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>OID Base</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="5">
-         <widget class="QPushButton" name="sendTable">
-          <property name="text">
-           <string>Send Table</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="10">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>Local Index</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QPushButton" name="discoverTable">
-          <property name="text">
-           <string>Discover Table</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="10">
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Column Alias</string>
+           <string>SMI Version</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -409,26 +469,6 @@
          <widget class="QCheckBox" name="readOnly">
           <property name="text">
            <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" colspan="5">
-         <widget class="QLineEdit" name="oidBase"/>
-        </item>
-        <item row="0" column="10">
-         <widget class="QLabel" name="statusColumnLabel">
-          <property name="text">
-           <string>Status Column</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2">
-         <widget class="QPushButton" name="getTable">
-          <property name="text">
-           <string>Get Table</string>
           </property>
          </widget>
         </item>
@@ -445,19 +485,6 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="8">
-         <widget class="QComboBox" name="smiVersion"/>
-        </item>
-        <item row="0" column="7">
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>SMI Version</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="8">
          <widget class="QSpinBox" name="keyCount">
           <property name="minimum">
@@ -465,23 +492,6 @@
           </property>
           <property name="value">
            <number>0</number>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="7">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>Keys columns</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="7">
-         <widget class="QLabel" name="label_16">
-          <property name="text">
-           <string>Regular columns</string>
           </property>
          </widget>
         </item>
@@ -495,22 +505,73 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="8">
-         <widget class="QSpinBox" name="rows">
-          <property name="maximum">
-           <number>65535</number>
+        <item row="2" column="2" rowspan="4">
+         <widget class="QGroupBox" name="getColumnsGroup">
+          <property name="title">
+           <string>Get Columns</string>
           </property>
+          <layout class="QGridLayout" name="gridLayout_4">
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Last Column</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="QSpinBox" name="getColumnsRequestCount"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>First Column</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QSpinBox" name="getColumnsLastColumn"/>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Simultaneous requests send</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QSpinBox" name="getColumnsFirstColumn"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QPushButton" name="getColumnsStart">
+             <property name="text">
+              <string>Start</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
-        <item row="4" column="7">
-         <widget class="QLabel" name="label_17">
-          <property name="text">
-           <string>Rows</string>
+        <item row="2" column="4">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
           </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -524,7 +585,7 @@
      <x>0</x>
      <y>0</y>
      <width>1080</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

@@ -35,6 +35,7 @@ class OIDValue
 
 public:
 	OIDValue()
+	    : mValue(0)
 	{	}
 	explicit OIDValue(const char *v)
 		: mStringValue( v )

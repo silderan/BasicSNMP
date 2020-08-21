@@ -117,7 +117,7 @@ QString asn1PrintableValue(const ASN1Variable &asn1Var)
 
 	case ASN1TYPE_IPv4Address:	return QString::fromStdString( Utils::ipv4AddressToStdString(asn1Var.toIPV4()) );
 	}
-	return QString("<no displayable>");
+	return QString("Unknown ASN1 value type: %1 (0x%2)").arg(asn1Var.type()).arg(asn1Var.type(), 2, 16, QChar('0'));
 }
 
 QString printableErrorCode(ASN1Encoder::ErrorCode ec)
