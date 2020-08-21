@@ -141,7 +141,7 @@ public:
 	}
 	TableColumnInfoList fromSaveString(const QString &saveString)
 	{
-		QStringList bits = saveString.split('$', QString::SkipEmptyParts);
+		QStringList bits = saveString.split('$', Qt::SkipEmptyParts);
 		if( bits.count() > 2 )
 		{
 			switch( bits[0].toInt() )
