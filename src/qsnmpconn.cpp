@@ -102,16 +102,47 @@ void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comuni
 
 void SNMPConn::discoverTable(int version, const OID &oid, const QString &comunity, int requestID)
 {
-	Q_ASSERT( !mTableRequestMap.contains(requestID) );
-	mTableRequestMap[requestID] = oid;
+	Q_ASSERT( !mTableRequestList.contains(requestID) );
+	mTableRequestList.append(RequestInfo());
+	RequestInfo &ri = mTableRequestList.last();
+	ri.initialOID = oid;
+	ri.requestOID = oid;
+	ri.requestType = RequestInfo::RequestType::table;
+	ri.requestID = requestID;
+	ri.version = SNMP::Version(version);
+	ri.comunity = comunity;
 
-	qDebug() << "Discovering table";
-	sendGetNextRequest(version, oid, comunity, requestID);
+//	qDebug() << "Discovering table" << requestID;
+	play();
 }
 
 void SNMPConn::cancelDiscoverTable(int requestID)
 {
-	mTableRequestMap.remove(requestID);
+	qDebug() << "Canceled table with requestID=" << requestID;
+	mTableRequestList.remove(requestID);
+	if( mTableRequestList.count() )
+		play();
+}
+
+void SNMPConn::play()
+{
+	if( mTableRequestList.count() && mTableRequestList.first().isIdle() )
+	{
+		const RequestInfo &ri = mTableRequestList.first();
+		switch( ri.requestType )
+		{
+		case RequestInfo::RequestType::exact:
+			sendGetRequest(ri.version, ri.requestOID, ri.comunity, ri.requestID);
+			break;
+		case RequestInfo::RequestType::set:
+			sendSetRequest(ri.version, ri.requestOID, ri.comunity, ri.asn1Var, ri.requestID);
+			break;
+		case RequestInfo::RequestType::next:
+		case RequestInfo::RequestType::table:
+			sendGetNextRequest(ri.version, ri.requestOID, ri.comunity, ri.requestID);
+			break;
+		}
+	}
 }
 
 void SNMPConn::onDataReceived()
@@ -123,19 +154,19 @@ void SNMPConn::onDataReceived()
 		Encoder snmp;
 		snmp.decodeAll(datagram, includeRawData());
 
-		if( !mTableRequestMap.contains(snmp.requestID()) )
+		if( !mTableRequestList.contains(snmp.requestID()) )
 			emit dataReceived(snmp);
 		else
 		{
-			OID tableBaseOID = mTableRequestMap.value(snmp.requestID());
+			RequestInfo &ri = mTableRequestList.first();
+			Q_ASSERT(ri.requestID == snmp.requestID());
+
 			if( snmp.varbindList().count() &&
-				snmp.varbindList().first().oid().startsWith(tableBaseOID) )
+				snmp.varbindList().first().oid().startsWith(ri.initialOID) )
 			{
 				emit tableCellReceived( snmp );
-				sendGetNextRequest( snmp.version(),
-									snmp.varbindList().first().oid(),
-									QString::fromStdString(snmp.comunity()),
-									snmp.requestID() );
+				ri.requestOID = snmp.varbindList().first().oid();
+				play();
 			}
 			else
 			{

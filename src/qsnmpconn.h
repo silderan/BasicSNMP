@@ -39,8 +39,79 @@ Q_OBJECT
 	QUdpSocket mTrapSocket;
 	bool mIncludeRawData;		// This is usefull for debuging applications.
 
-	QMap<int, SNMP::OID> mTableRequestMap;
+	struct RequestInfo
+	{
+		int requestID;
+		SNMP::OID requestOID;
+		SNMP::OID initialOID;	// Only for table requests.
+		SNMP::Version version;
+		QString comunity;
+		SNMP::ASN1Variable asn1Var;	// Only for Set requests
+		enum RequestType
+		{
+			exact,
+			next,
+			set,
+			table
+		} requestType;
+		enum RequestStatus
+		{
+			idle,
+			requested
+		}requestStatus;
 
+		RequestInfo(const RequestInfo &other) = default;
+		RequestInfo()
+		 : requestID(0)
+		 , requestOID(0)
+		 , initialOID(0)
+		 , version(SNMP::V1)
+		 , asn1Var()
+		 , requestType(RequestType::exact)
+		 , requestStatus(RequestStatus::idle)
+		{	}
+		bool isIdle()const		{ return requestStatus == RequestStatus::idle;		}
+		bool isRequested()const { return requestStatus == RequestStatus::requested;	}
+	};
+
+	class RequestInfoList : public QList<RequestInfo>
+	{
+	public:
+		RequestInfo currentRequestInfo() const
+		{
+			return count() ? first() : RequestInfo();
+		}
+		bool contains(const int requestID) const
+		{
+			for( const RequestInfo &t : *this )
+				if( t.requestID == requestID )
+					return true;
+			return false;
+		}
+		SNMP::OID initialOID(const int &requestID) const
+		{
+			for( const RequestInfo &t : *this )
+				if( t.requestID == requestID )
+					return t.initialOID;
+			return SNMP::OID();
+		}
+		bool remove( const int &requestID )
+		{
+			int i = 0;
+			for( const RequestInfo &t : *this )
+			{
+				if( t.requestID == requestID )
+				{
+					removeAt(i);
+					return true;
+				}
+				i++;
+			}
+			return false;
+		}
+	}mTableRequestList;
+
+	void play();
 	void onDataReceived();
 	void onTrapReceived();
 
@@ -62,18 +133,21 @@ public:
 	{
 		sendGetRequest(version, SNMP::OID(oid.toStdString()), comunity, requestID);
 	}
+	void appendSendGetRequest(int version, const SNMP::OID &oid, const QString &comunity, int requestID);
 
 	void sendGetNextRequest(int version, const SNMP::OID &oid, const QString &comunity, int requestID);
 	void sendGetNextRequest(int version, const QString &oid, const QString &comunity, int requestID)
 	{
 		sendGetNextRequest(version, SNMP::OID(oid.toStdString()), comunity, requestID);
 	}
+	void appendSendGetNextRequest(int version, const SNMP::OID &oid, const QString &comunity, int requestID);
 
 	void sendSetRequest(int version, const SNMP::OID &oid, const QString &comunity, const SNMP::ASN1Variable &asn1Var, int requestID);
 	void sendSetRequest(int version, const QString &oid, const QString &comunity, const SNMP::ASN1Variable &asn1Var, int requestID)
 	{
 		sendSetRequest(version, SNMP::OID(oid.toStdString()), comunity, asn1Var, requestID);
 	}
+	void appendSendSetRequest(int version, const SNMP::OID &oid, const QString &comunity, const SNMP::ASN1Variable &asn1Var, int requestID);
 
 	void discoverTable(int version, const SNMP::OID &oid, const QString &comunity, int requestID);
 	void discoverTable(int version, const QString &oid, const QString &comunity, int requestID)
@@ -82,8 +156,8 @@ public:
 	}
 
 	void cancelDiscoverTable(int requestID);
-	SNMP::OID tableBaseOID(int requestID) const			{ return mTableRequestMap.value(requestID);		}
-	bool isDiscoveringTable(int requestID) const	{ return mTableRequestMap.contains(requestID);	}
+	SNMP::OID tableBaseOID(int requestID) const			{ return mTableRequestList.initialOID(requestID);	}
+	bool isDiscoveringTable(int requestID) const		{ return mTableRequestList.contains(requestID);		}
 
 signals:
 	void dataReceived(const SNMP::Encoder &snmp);
