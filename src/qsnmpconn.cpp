@@ -86,11 +86,39 @@ void SNMPConn::sendGetRequest(int version, const OID &oid, const QString &comuni
 	sendRequest(snmpDeco);
 }
 
+void SNMPConn::appendSendGetRequest(int version, const OID &oid, const QString &comunity, int requestID)
+{
+	mRequestList.append(RequestInfo());
+	RequestInfo &ri = mRequestList.last();
+	ri.requestOID = oid;
+	ri.requestType = RequestInfo::RequestType::get;
+	ri.requestID = requestID;
+	ri.version = Version(version);
+	ri.comunity = comunity;
+
+//	qDebug() << "Appended GET request" << requestID;
+	play();
+}
+
 void SNMPConn::sendGetNextRequest(int version, const OID &oid, const QString &comunity, int requestID)
 {
 	Encoder snmpDeco;
 	snmpDeco.setupGetNextRequest(version, comunity.toStdString(), requestID, oid);
 	sendRequest(snmpDeco);
+}
+
+void SNMPConn::appendSendGetNextRequest(int version, const OID &oid, const QString &comunity, int requestID)
+{
+	mRequestList.append(RequestInfo());
+	RequestInfo &ri = mRequestList.last();
+	ri.requestOID = oid;
+	ri.requestType = RequestInfo::RequestType::next;
+	ri.requestID = requestID;
+	ri.version = Version(version);
+	ri.comunity = comunity;
+
+//	qDebug() << "Appended GETNext request" << requestID;
+	play();
 }
 
 void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comunity, const ASN1Variable &asn1Var, int requestID)
@@ -100,16 +128,31 @@ void SNMPConn::sendSetRequest(int version, const OID &oid, const QString &comuni
 	sendRequest(snmpDeco);
 }
 
+void SNMPConn::appendSendSetRequest(int version, const OID &oid, const QString &comunity, const ASN1Variable &asn1Var, int requestID)
+{
+	mRequestList.append(RequestInfo());
+	RequestInfo &ri = mRequestList.last();
+	ri.requestOID = oid;
+	ri.requestType = RequestInfo::RequestType::set;
+	ri.requestID = requestID;
+	ri.version = Version(version);
+	ri.comunity = comunity;
+	ri.asn1Var = asn1Var;
+
+//	qDebug() << "Appended SET request" << requestID;
+	play();
+}
+
 void SNMPConn::discoverTable(int version, const OID &oid, const QString &comunity, int requestID)
 {
-	Q_ASSERT( !mTableRequestList.contains(requestID) );
-	mTableRequestList.append(RequestInfo());
-	RequestInfo &ri = mTableRequestList.last();
+	Q_ASSERT( !mRequestList.contains(requestID) );
+	mRequestList.append(RequestInfo());
+	RequestInfo &ri = mRequestList.last();
 	ri.initialOID = oid;
 	ri.requestOID = oid;
 	ri.requestType = RequestInfo::RequestType::table;
 	ri.requestID = requestID;
-	ri.version = SNMP::Version(version);
+	ri.version = Version(version);
 	ri.comunity = comunity;
 
 //	qDebug() << "Discovering table" << requestID;
@@ -119,19 +162,19 @@ void SNMPConn::discoverTable(int version, const OID &oid, const QString &comunit
 void SNMPConn::cancelDiscoverTable(int requestID)
 {
 	qDebug() << "Canceled table with requestID=" << requestID;
-	mTableRequestList.remove(requestID);
-	if( mTableRequestList.count() )
+	mRequestList.remove(requestID);
+	if( mRequestList.count() )
 		play();
 }
 
 void SNMPConn::play()
 {
-	if( mTableRequestList.count() && mTableRequestList.first().isIdle() )
+	if( mRequestList.count() && mRequestList.first().isIdle() )
 	{
-		const RequestInfo &ri = mTableRequestList.first();
+		const RequestInfo &ri = mRequestList.first();
 		switch( ri.requestType )
 		{
-		case RequestInfo::RequestType::exact:
+		case RequestInfo::RequestType::get:
 			sendGetRequest(ri.version, ri.requestOID, ri.comunity, ri.requestID);
 			break;
 		case RequestInfo::RequestType::set:
@@ -154,11 +197,11 @@ void SNMPConn::onDataReceived()
 		Encoder snmp;
 		snmp.decodeAll(datagram, includeRawData());
 
-		if( !mTableRequestList.contains(snmp.requestID()) )
+		if( !mRequestList.contains(snmp.requestID()) )
 			emit dataReceived(snmp);
 		else
 		{
-			RequestInfo &ri = mTableRequestList.first();
+			RequestInfo &ri = mRequestList.first();
 			Q_ASSERT(ri.requestID == snmp.requestID());
 
 			if( snmp.varbindList().count() &&

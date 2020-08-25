@@ -49,7 +49,7 @@ Q_OBJECT
 		SNMP::ASN1Variable asn1Var;	// Only for Set requests
 		enum RequestType
 		{
-			exact,
+			get,
 			next,
 			set,
 			table
@@ -67,7 +67,7 @@ Q_OBJECT
 		 , initialOID(0)
 		 , version(SNMP::V1)
 		 , asn1Var()
-		 , requestType(RequestType::exact)
+		 , requestType(RequestType::get)
 		 , requestStatus(RequestStatus::idle)
 		{	}
 		bool isIdle()const		{ return requestStatus == RequestStatus::idle;		}
@@ -109,7 +109,7 @@ Q_OBJECT
 			}
 			return false;
 		}
-	}mTableRequestList;
+	}mRequestList;
 
 	void play();
 	void onDataReceived();
@@ -156,8 +156,8 @@ public:
 	}
 
 	void cancelDiscoverTable(int requestID);
-	SNMP::OID tableBaseOID(int requestID) const			{ return mTableRequestList.initialOID(requestID);	}
-	bool isDiscoveringTable(int requestID) const		{ return mTableRequestList.contains(requestID);		}
+	SNMP::OID tableBaseOID(int requestID) const			{ return mRequestList.initialOID(requestID);	}
+	bool isDiscoveringTable(int requestID) const		{ return mRequestList.contains(requestID);		}
 
 signals:
 	void dataReceived(const SNMP::Encoder &snmp);
